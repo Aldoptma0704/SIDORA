@@ -20,6 +20,13 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/home', function () {
+    if (auth()->check()) {
+        return redirect('/' . auth()->user()->role . '/dashboard');
+    }
+    return redirect('/login');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('login.process');
@@ -30,7 +37,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('admin.dashboard');
     Route::resource('/users', UserController::class);
 });
-
 
 
 // ---------------- Pegawai ----------------
