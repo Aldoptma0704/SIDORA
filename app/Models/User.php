@@ -17,10 +17,18 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    public function surats()
+    {
+        return $this->hasMany(Surat::class);
+    }
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'user_id',
+        'judul',
+        'jenis',
+        'isi',
+        'status',
+        'lampiran'
     ];
 
     /**

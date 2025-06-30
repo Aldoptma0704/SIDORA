@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Pegawai\SuratController as PegawaiSuratController;
+use App\Http\Controllers\Pimpinan\SuratController as PimpinanSuratController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,7 +15,39 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+// Halaman Awal / Login
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'authenticate'])->name('login.process');
+});
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// ---------------- Admin ----------------
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('admin.dashboard');
+    Route::resource('/users', UserController::class);
+});
+
+
+
+// ---------------- Pegawai ----------------
+Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->group(function () {
+    Route::get('/dashboard', [PegawaiSuratController::class, 'index'])->name('pegawai.dashboard');
+    Route::get('/surat', [PegawaiSuratController::class, 'index'])->name('surat.index');
+    Route::get('/surat/create', [PegawaiSuratController::class, 'create'])->name('surat.create');
+    Route::post('/surat', [PegawaiSuratController::class, 'store'])->name('surat.store');
+    Route::get('/surat/{id}', [PegawaiSuratController::class, 'show'])->name('surat.show');
+    // Tambahkan route edit/update/hapus jika Pegawai boleh
+});
+
+
+// ---------------- Pimpinan ----------------
+Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function () {
+    Route::get('/dashboard', [PimpinanSuratController::class, 'index'])->name('pimpinan.dashboard');
+    Route::post('/surat/{id}/setujui', [PimpinanSuratController::class, 'setujui'])->name('pimpinan.surat.setujui');
+    Route::post('/surat/{id}/tolak', [PimpinanSuratController::class, 'tolak'])->name('pimpinan.surat.tolak');
+    Route::get('/disposisi', [PimpinanSuratController::class, 'disposisi'])->name('pimpinan.disposisi');
 });
