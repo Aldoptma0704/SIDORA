@@ -6,11 +6,18 @@
     <title>Sistem Surat Dinas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.0/trix.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/trix/2.1.0/trix.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+
+        [x-cloak] { display: none !important; }
     </style>
+    <!-- Di dalam <head> -->
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
     <!-- Navbar -->
