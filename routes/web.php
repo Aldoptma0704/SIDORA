@@ -20,6 +20,13 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/home', function () {
+    if (auth()->check()) {
+        return redirect('/' . auth()->user()->role . '/dashboard');
+    }
+    return redirect('/login');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('login.process');
@@ -41,6 +48,11 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->group(function (
     Route::post('/surat', [PegawaiSuratController::class, 'store'])->name('surat.store');
     Route::get('/surat/{id}', [PegawaiSuratController::class, 'show'])->name('surat.show');
     // Tambahkan route edit/update/hapus jika Pegawai boleh
+    Route::get('/surat/{id}/preview', [PegawaiSuratController::class, 'preview'])->name('surat.preview');
+    Route::get('/surat/{id}/download', [PegawaiSuratController::class, 'download'])->name('surat.download');
+    Route::get('/surat/{id}/edit', [PegawaiSuratController::class, 'edit'])->name('surat.edit');
+
+
 });
 
 
