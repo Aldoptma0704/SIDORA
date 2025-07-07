@@ -11,53 +11,73 @@
             line-height: 1.6;
             margin: 40px;
         }
+
         .header {
             text-align: center;
         }
+
         .logo-text {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         .logo-text img {
             height: 80px;
         }
+
         hr {
             border: 1.5px solid black;
             margin-top: 10px;
             margin-bottom: 20px;
         }
-        .table-info td {
-            padding: 4px 8px;
+
+        .table-info {
+            width: 60%;
+            margin-bottom: 10px;
+            border-spacing: 0;
         }
+
+        .table-info td {
+            padding: 2px 6px;
+            vertical-align: top;
+        }
+
+        .table-info td.label {
+            width: 80px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
         .ttd {
             margin-top: 80px;
             text-align: right;
         }
 
-        table {
+        /* Border hanya untuk tabel isi surat */
+        .isi-tabel {
             border-collapse: collapse;
             width: 100%;
             margin-top: 10px;
         }
-        table, th, td {
+
+        .isi-tabel th, .isi-tabel td {
             border: 1px solid #000;
-        }
-        th, td {
             padding: 6px;
             text-align: left;
         }
+
         strong, b {
             font-weight: bold;
         }
+
         em, i {
             font-style: italic;
         }
+
         p {
             margin: 6px 0;
         }
-</style>
-
     </style>
 </head>
 <body>
@@ -85,21 +105,22 @@
 
     <p style="text-align: right;">Bandar Lampung, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
 
+    {{-- Informasi Surat --}}
     <table class="table-info">
         <tr>
-            <td>Nomor</td>
+            <td class="label">Nomor</td>
             <td>: {{ $surat->nomor_surat ?? '-' }}</td>
         </tr>
         <tr>
-            <td>Sifat</td>
+            <td class="label">Sifat</td>
             <td>: {{ $surat->sifat ?? '-' }}</td>
         </tr>
         <tr>
-            <td>Lampiran</td>
+            <td class="label">Lampiran</td>
             <td>: {{ $surat->lampiran ?? '-' }}</td>
         </tr>
         <tr>
-            <td>Hal</td>
+            <td class="label">Hal</td>
             <td>: {{ $surat->judul }}</td>
         </tr>
     </table>
@@ -109,10 +130,12 @@
 
     <p>Sehubungan dengan hal tersebut, kami sampaikan bahwa:</p>
 
-    {!! $surat->isi !!}
+    {{-- Isi Surat --}}
+    {!! str_replace('<table', '<table class="isi-tabel"', $surat->isi) !!}
 
     <p>Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 
+    {{-- Tanda Tangan --}}
     <div class="ttd">
         <p>Hormat kami,</p>
         <br><br><br>
