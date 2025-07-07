@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Pegawai\SuratController as PegawaiSuratController;
 use App\Http\Controllers\Pimpinan\SuratController as PimpinanSuratController;
+use App\Http\Controllers\Pegawai\PegawaiDashboardController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,23 +39,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::resource('/users', UserController::class);
 });
 
-
-
 // ---------------- Pegawai ----------------
 Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->group(function () {
-    Route::get('/dashboard', [PegawaiSuratController::class, 'index'])->name('pegawai.dashboard');
+    Route::get('/dashboard', [PegawaiDashboardController::class, 'index'])->name('pegawai.dashboard');
+    Route::get('/status_surat', [PegawaiDashboardController::class, 'statusSurat'])->name('surat.status_surat');
+    Route::post('/surat', [PegawaiSuratController::class, 'store'])->name('surat.store');
     Route::get('/surat', [PegawaiSuratController::class, 'index'])->name('surat.index');
+
     Route::get('/surat/create', [PegawaiSuratController::class, 'create'])->name('surat.create');
     Route::post('/surat', [PegawaiSuratController::class, 'store'])->name('surat.store');
-    Route::get('/surat/{id}', [PegawaiSuratController::class, 'show'])->name('surat.show');
-    // Tambahkan route edit/update/hapus jika Pegawai boleh
+
     Route::get('/surat/{id}/preview', [PegawaiSuratController::class, 'preview'])->name('surat.preview');
     Route::get('/surat/{id}/download', [PegawaiSuratController::class, 'download'])->name('surat.download');
     Route::get('/surat/{id}/edit', [PegawaiSuratController::class, 'edit'])->name('surat.edit');
+    Route::put('/surat/{id}', [PegawaiSuratController::class, 'update'])->name('surat.update'); 
+    Route::delete('/surat/bulk-delete', [PegawaiSuratController::class, 'bulkDelete'])->name('surat.bulk_delete');
 
-
+    Route::post('/surat/upload-pdf', [PegawaiSuratController::class, 'uploadPdf'])->name('surat.upload_pdf');
 });
-
 
 // ---------------- Pimpinan ----------------
 Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function () {

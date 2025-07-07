@@ -34,6 +34,30 @@
             margin-top: 80px;
             text-align: right;
         }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #000;
+        }
+        th, td {
+            padding: 6px;
+            text-align: left;
+        }
+        strong, b {
+            font-weight: bold;
+        }
+        em, i {
+            font-style: italic;
+        }
+        p {
+            margin: 6px 0;
+        }
+</style>
+
     </style>
 </head>
 <body>
@@ -85,7 +109,7 @@
 
     <p>Sehubungan dengan hal tersebut, kami sampaikan bahwa:</p>
 
-    <p>{!! nl2br(e($surat->isi)) !!}</p>
+    {!! $surat->isi !!}
 
     <p>Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 

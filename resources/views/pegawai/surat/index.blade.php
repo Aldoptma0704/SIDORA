@@ -1,68 +1,117 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-semibold text-gray-800">Daftar Surat Anda</h1>
-    <div class="flex gap-2">
-        <a href="{{ route('surat.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700 transition">
-            <i class="fas fa-plus mr-2"></i> Buat Surat Baru
-        </a>
-        <a href="#ajukan-persetujuan" class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold rounded shadow hover:bg-green-700 transition">
-            <i class="fas fa-paper-plane mr-2"></i> Ajukan Persetujuan
-        </a>
+{{-- Notifikasi Sukses atau Error --}}
+@if (session('success'))
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-md shadow" role="alert">
+        <p>{{ session('success') }}</p>
     </div>
-</div>
+@endif
+@if ($errors->any())
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md shadow" role="alert">
+        <p class="font-bold">Terjadi Kesalahan</p>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>- {{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
-<table class="min-w-full bg-white border border-gray-200 rounded shadow overflow-hidden">
-    <thead class="bg-gray-100 text-left text-sm font-semibold text-gray-600">
-        <tr>
-            <th class="px-4 py-2 border-b">No</th>
-            <th class="px-4 py-2 border-b">Judul Surat</th>
-            <th class="px-4 py-2 border-b">Jenis Surat</th>
-            <th class="px-4 py-2 border-b">Status</th>
-            <th class="px-4 py-2 border-b text-center">Aksi</th>
-        </tr>
-    </thead>
-    <tbody class="text-sm text-gray-700">
-        @foreach ($surats as $index => $surat)
-            <tr class="hover:bg-blue-50 transition">
-                <td class="px-4 py-2 border-b">{{ $index + 1 }}</td>
-                <td class="px-4 py-2 border-b font-medium">{{ $surat->judul }}</td>
-                <td class="px-4 py-2 border-b capitalize">{{ $surat->jenis }}</td>
-                <td class="px-4 py-2 border-b">
-                    @php
-                        $statusClass = match($surat->status) {
-                            'disetujui' => 'bg-green-100 text-green-800',
-                            'ditolak' => 'bg-red-100 text-red-800',
-                            default => 'bg-yellow-100 text-yellow-800'
-                        };
-                    @endphp
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold {{ $statusClass }}">
-                        {{ ucfirst($surat->status) }}
-                    </span>
-                </td>
-                <td class="px-4 py-2 border-b text-center space-x-2">
-                    @if($surat->status === 'menunggu')
-                        <a href="{{ route('surat.edit', $surat->id) }}" class="inline-flex items-center px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow">
-                            <i class="fas fa-edit mr-1"></i> Edit
-                        </a>
-                        <form action="{{ url('pegawai/surat/' . $surat->id . '/ajukan') }}" method="POST" class="inline-block">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-3 py-1 text-sm text-white bg-green-600 hover:bg-green-700 rounded-md shadow">
-                                <i class="fas fa-paper-plane mr-1"></i> Ajukan
-                            </button>
-                        </form>
-                    @else
-                        <button class="inline-flex items-center px-3 py-1 text-sm text-white bg-gray-400 rounded-md shadow cursor-not-allowed" disabled>
-                            <i class="fas fa-edit mr-1"></i> Edit
-                        </button>
-                        <button class="inline-flex items-center px-3 py-1 text-sm text-white bg-gray-400 rounded-md shadow cursor-not-allowed" disabled>
-                            <i class="fas fa-paper-plane mr-1"></i> Ajukan
-                        </button>
-                    @endif
-                </td>
+{{-- MODIFIED: Dibungkus dengan x-data untuk modal --}}
+<div x-data="{ showModal: false }">
+    <div class="flex justify-between items-center mb-6">
+        {{-- MODIFIED: Judul Halaman Dinamis --}}
+        @php
+            $title = match($jenis ?? null) {
+                'masuk'   => 'Daftar Surat Masuk',
+                'keluar'  => 'Daftar Surat Keluar',
+                default   => 'Daftar Semua Surat Anda',
+            };
+        @endphp
+        <h1 class="text-2xl font-semibold text-gray-800">{{ $title }}</h1>
+        
+        <div class="flex gap-2">
+            {{-- ADDED: Tombol Upload PDF --}}
+            <button @click="showModal = true" type="button" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded shadow hover:bg-purple-700 transition">
+                <i class="fas fa-upload mr-2"></i> Upload PDF
+            </button>
+            <a href="{{ route('surat.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700 transition">
+                <i class="fas fa-plus mr-2"></i> Buat Surat Baru
+            </a>
+        </div>
+    </div>
+
+    {{-- ADDED: Modal untuk Upload PDF --}}
+    <div x-show="showModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" x-cloak>
+        <div @click.away="showModal = false" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4">Upload File Surat (PDF)</h3>
+            <form action="{{ route('surat.upload_pdf') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div>
+                    <label for="file_surat" class="block text-sm font-medium text-gray-700">Pilih File</label>
+                    <input type="file" name="file_surat" id="file_surat" accept=".pdf" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="text-xs text-gray-500 mt-1">Hanya file PDF yang diterima. Ukuran maksimal 5MB.</p>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Tabel Daftar Surat (Konten tidak berubah) --}}
+    <table class="min-w-full bg-white border border-gray-200 rounded shadow overflow-hidden">
+        {{-- ... isi thead dan tbody Anda yang sudah ada ... --}}
+        <thead class="bg-gray-100 text-left text-sm font-semibold text-gray-600">
+            <tr>
+                <th class="px-4 py-2 border-b">No</th>
+                <th class="px-4 py-2 border-b">Judul Surat</th>
+                <th class="px-4 py-2 border-b">Jenis Surat</th>
+                <th class="px-4 py-2 border-b">Status</th>
+                <th class="px-4 py-2 border-b text-center">Aksi</th>
             </tr>
-        @endforeach
-    </tbody>
-</table>
+        </thead>
+        <tbody class="text-sm text-gray-700">
+            @forelse ($surats as $index => $surat)
+                <tr class="hover:bg-blue-50 transition">
+                    <td class="px-4 py-2 border-b">{{ $index + 1 }}</td>
+                    <td class="px-4 py-2 border-b font-medium">{{ $surat->judul }}</td>
+                    <td class="px-4 py-2 border-b capitalize">{{ $surat->jenis }}</td>
+                    <td class="px-4 py-2 border-b">
+                        @php
+                            $statusClass = match($surat->status) {
+                                'disetujui' => 'bg-green-100 text-green-800',
+                                'ditolak' => 'bg-red-100 text-red-800',
+                                default => 'bg-yellow-100 text-yellow-800'
+                            };
+                        @endphp
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold {{ $statusClass }}">
+                            {{ ucfirst($surat->status) }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 border-b text-center">
+                        {{-- Jika ada file, tampilkan tombol lihat file --}}
+                        @if ($surat->file_path)
+                            <a href="{{ asset('storage/' . $surat->file_path) }}" target="_blank" class="inline-flex items-center px-3 py-1 text-sm text-white bg-gray-600 hover:bg-gray-700 rounded-md shadow">
+                                <i class="fas fa-file-pdf mr-1"></i> Lihat PDF
+                            </a>
+                        @else
+                            <a href="{{ route('surat.preview', $surat->id) }}" class="inline-flex items-center px-3 py-1 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow">
+                                <i class="fas fa-eye mr-1"></i> Lihat
+                            </a>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center py-8 text-gray-500">
+                        Belum ada surat yang dibuat atau diunggah.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 @endsection

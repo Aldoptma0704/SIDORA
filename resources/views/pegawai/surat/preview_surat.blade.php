@@ -3,12 +3,20 @@
 @section('content')
 <div class="bg-white p-8 max-w-3xl mx-auto text-sm text-black leading-relaxed">
 
+    {{-- ADDED: Notifikasi jika ada pesan sukses dari session --}}
+    @if (session('success'))
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+            <p class="font-bold">Berhasil</p>
+            <p>{{ session('success') }}</p>
+        </div>
+    @endif
+
     {{-- Header dengan Logo & Teks di samping --}}
-    <div class="flex items-center mb-4">
+    <div class="flex items-center justify-center mb-4"> 
         <div class="shrink-0">
             <img src="{{ asset('img/logo_lampung.png') }}" alt="Logo" style="height: 90px;">
         </div>
-        <div class="flex-1 text-center">
+        <div class="ml-6 text-center"> 
             <h1 class="text-lg font-bold uppercase">PEMERINTAH PROVINSI LAMPUNG</h1>
             <h2 class="text-md font-semibold uppercase">DINAS TENAGA KERJA</h2>
             <p class="text-sm">
@@ -35,8 +43,8 @@
     <p class="mb-4">Di — {{ strtoupper('Bandar Lampung') }}</p>
 
     <p class="mb-4">Sehubungan dengan hal tersebut, kami sampaikan bahwa:</p>
-    <div class="mb-4">{!! nl2br(e($surat->isi)) !!}</div>
-
+    <div class="ql-editor">{!! $surat->isi !!}</div>
+    
     <p class="mt-6">Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 
     {{-- Tanda tangan --}}
@@ -48,14 +56,32 @@
     </div>
 </div>
 
-<div class="flex justify-between mb-4">
-    <a href="{{ route('surat.download', $surat->id) }}" 
-       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-        📄 Download PDF
-    </a>
-    <a href="{{ route('surat.edit', $surat->id) }}" 
-       class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-        ✏️ Edit Kembali
-    </a>
+{{-- MODIFIED: Blok Tombol Aksi --}}
+<div class="max-w-3xl mx-auto my-6">
+    @if (request('view') == 'status')
+        {{-- Jika diakses dari halaman Status, hanya tampilkan tombol Kembali ke Status --}}
+        <a href="{{ route('surat.status_surat') }}" 
+           class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow">
+            Kembali
+        </a>
+    @else
+        {{-- Jika diakses dari alur Buat/Edit, tampilkan semua tombol aksi --}}
+        <div class="flex justify-between items-center">
+            <a href="{{ route('surat.index') }}" 
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow">
+                ✅ Selesai & Kembali
+            </a>
+            <div class="flex space-x-2">
+                <a href="{{ route('surat.download', $surat->id) }}" 
+                   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
+                    📄 Download PDF
+                </a>
+                <a href="{{ route('surat.edit', $surat->id) }}" 
+                   class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 shadow">
+                    ✏️ Edit Kembali
+                </a>
+            </div>
+        </div>
+    @endif
 </div>
 @endsection
