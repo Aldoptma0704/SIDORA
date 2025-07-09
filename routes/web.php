@@ -64,4 +64,5 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function
     Route::post('/surat/{id}/setujui', [PimpinanSuratController::class, 'setujui'])->name('pimpinan.surat.setujui');
     Route::post('/surat/{id}/tolak', [PimpinanSuratController::class, 'tolak'])->name('pimpinan.surat.tolak');
     Route::get('/disposisi', [PimpinanSuratController::class, 'disposisi'])->name('pimpinan.disposisi');
+    Route::get('/surat/{id}/preview', [PimpinanSuratController::class, 'preview'])->name('pimpinan.surat.preview');
 });
