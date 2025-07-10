@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-{{-- Notifikasi Sukses atau Error --}}
 @if (session('success'))
     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-md shadow" role="alert">
         <p>{{ session('success') }}</p>
@@ -18,10 +17,8 @@
     </div>
 @endif
 
-{{-- MODIFIED: Dibungkus dengan x-data untuk modal --}}
 <div x-data="{ showModal: false }">
     <div class="flex justify-between items-center mb-6">
-        {{-- MODIFIED: Judul Halaman Dinamis --}}
         @php
             $title = match($jenis ?? null) {
                 'masuk'   => 'Daftar Surat Masuk',
@@ -32,7 +29,6 @@
         <h1 class="text-2xl font-semibold text-gray-800">{{ $title }}</h1>
         
         <div class="flex gap-2">
-            {{-- ADDED: Tombol Upload PDF --}}
             <button @click="showModal = true" type="button" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded shadow hover:bg-purple-700 transition">
                 <i class="fas fa-upload mr-2"></i> Upload PDF
             </button>
@@ -42,8 +38,8 @@
         </div>
     </div>
 
-    {{-- ADDED: Modal untuk Upload PDF --}}
-    <div x-show="showModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" x-cloak>
+    {{-- Modal Upload PDF --}}
+    <div x-show="showModal" x-transition class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" x-cloak>
         <div @click.away="showModal = false" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <h3 class="text-lg font-semibold mb-4">Upload File Surat (PDF)</h3>
             <form action="{{ route('surat.upload_pdf') }}" method="POST" enctype="multipart/form-data">
@@ -51,7 +47,7 @@
                 <div>
                     <label for="file_surat" class="block text-sm font-medium text-gray-700">Pilih File</label>
                     <input type="file" name="file_surat" id="file_surat" accept=".pdf" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    <p class="text-xs text-gray-500 mt-1">Hanya file PDF yang diterima. Ukuran maksimal 5MB.</p>
+                    <p class="text-xs text-gray-500 mt-1">Hanya file PDF. Maksimal 5MB.</p>
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Batal</button>
@@ -61,14 +57,13 @@
         </div>
     </div>
 
-    {{-- Tabel Daftar Surat (Konten tidak berubah) --}}
+    {{-- Tabel --}}
     <table class="min-w-full bg-white border border-gray-200 rounded shadow overflow-hidden">
-        {{-- ... isi thead dan tbody Anda yang sudah ada ... --}}
         <thead class="bg-gray-100 text-left text-sm font-semibold text-gray-600">
             <tr>
                 <th class="px-4 py-2 border-b">No</th>
                 <th class="px-4 py-2 border-b">Judul Surat</th>
-                <th class="px-4 py-2 border-b">Jenis Surat</th>
+                <th class="px-4 py-2 border-b">Jenis</th>
                 <th class="px-4 py-2 border-b">Status</th>
                 <th class="px-4 py-2 border-b text-center">Aksi</th>
             </tr>
@@ -77,7 +72,12 @@
             @forelse ($surats as $index => $surat)
                 <tr class="hover:bg-blue-50 transition">
                     <td class="px-4 py-2 border-b">{{ $index + 1 }}</td>
-                    <td class="px-4 py-2 border-b font-medium">{{ $surat->judul }}</td>
+                    <td class="px-4 py-2 border-b font-medium">
+                        {{ $surat->judul }}
+                        @if($surat->disposisi_user_id && $surat->disposisi_user_id == auth()->id())
+                            <span class="ml-2 text-xs text-blue-600 bg-blue-50 font-semibold px-2 py-0.5 rounded-full">Disposisi</span>
+                        @endif
+                    </td>
                     <td class="px-4 py-2 border-b capitalize">{{ $surat->jenis }}</td>
                     <td class="px-4 py-2 border-b">
                         @php
@@ -92,7 +92,6 @@
                         </span>
                     </td>
                     <td class="px-4 py-2 border-b text-center">
-                        {{-- Jika ada file, tampilkan tombol lihat file --}}
                         @if ($surat->file_path)
                             <a href="{{ asset('storage/' . $surat->file_path) }}" target="_blank" class="inline-flex items-center px-3 py-1 text-sm text-white bg-gray-600 hover:bg-gray-700 rounded-md shadow">
                                 <i class="fas fa-file-pdf mr-1"></i> Lihat PDF
@@ -107,7 +106,7 @@
             @empty
                 <tr>
                     <td colspan="5" class="text-center py-8 text-gray-500">
-                        Belum ada surat yang dibuat atau diunggah.
+                        Belum ada surat yang dibuat atau diterima.
                     </td>
                 </tr>
             @endforelse

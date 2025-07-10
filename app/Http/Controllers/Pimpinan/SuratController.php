@@ -45,6 +45,10 @@ class SuratController extends Controller
         $surat->status = 'disetujui';
         $surat->disposisi = $request->disposisi;
         $surat->signed_at = now();
+
+        // Tambahkan ini
+        $surat->perlu_disposisi_admin = true;
+
         $surat->save();
 
         return redirect()->route('pimpinan.dashboard')->with('success', 'Surat berhasil disetujui dan didisposisikan.');
@@ -56,13 +60,13 @@ class SuratController extends Controller
     //     $surats = Surat::where('status', 'disetujui')->get();
     //     return view('pimpinan.surat.disposisi', compact('surats'));
     // }
-    
+
     public function disposisi()
     {
         $surats = Surat::where('status', 'disetujui')
-                    ->whereNotNull('disposisi')
-                    ->orderBy('disposisi')
-                    ->get();
+            ->whereNotNull('disposisi')
+            ->orderBy('disposisi')
+            ->get();
 
         return view('pimpinan.surat.disposisi', compact('surats'));
     }
@@ -93,6 +97,4 @@ class SuratController extends Controller
         $surat = Surat::findOrFail($id);
         return view('pimpinan.surat.preview', compact('surat'));
     }
-
-
 }
