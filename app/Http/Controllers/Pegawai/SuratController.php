@@ -13,25 +13,27 @@ class SuratController extends Controller
 {
     public function index(Request $request)
     {
-    $userId = auth()->id();
-    $jenis = $request->query('jenis'); // Ambil parameter 'jenis' dari URL
+        $userId = auth()->id();
+        $jenis = $request->query('jenis'); // Ambil parameter 'jenis' dari URL
 
-    $query = Surat::where('user_id', $userId);
+        $query = Surat::where(function ($q) use ($userId) {
+            $q->where('user_id', $userId)
+                ->orWhere('disposisi_user_id', $userId); // Tambahkan surat disposisi
+        });
 
-    if ($jenis && in_array($jenis, ['masuk', 'keluar'])) {
-        $query->where('jenis', $jenis);
+        if ($jenis && in_array($jenis, ['masuk', 'keluar'])) {
+            $query->where('jenis', $jenis);
+        }
+
+        $surats = $query->latest()->get();
+
+        return view('pegawai.surat.index', [
+            'surats' => $surats,
+            'jenis' => $jenis
+        ]);
     }
 
-    // Ambil data surat yang sudah difilter dan urutkan dari yang terbaru
-    $surats = $query->latest()->get();
-
-    return view('pegawai.surat.index', [
-        'surats' => $surats,
-        'jenis' => $jenis // Kirim variabel 'jenis' ke view untuk judul dinamis
-    ]);
-    }
-
-    public function create()    
+    public function create()
     {
         return view('pegawai.surat.create_surat');
     }
@@ -121,7 +123,7 @@ class SuratController extends Controller
                 'penandatangan_nip' => 'required|string',
             ]);
         }
-        
+
         // Update data surat
         $surat->jenis = $request->jenis;
         $surat->judul = $request->judul;
@@ -159,15 +161,15 @@ class SuratController extends Controller
         $surat = Surat::findOrFail($id);
 
         $pdf = \PDF::loadView('pegawai.surat.pdf_surat', compact('surat'))
-                   ->setPaper('A4', 'portrait');
+            ->setPaper('A4', 'portrait');
 
         return $pdf->download('surat_' . $surat->nomor_surat . '.pdf');
     }
 
-     public function statusSurat(Request $request) // MODIFIED: Tambahkan Request $request
+    public function statusSurat(Request $request) // MODIFIED: Tambahkan Request $request
     {
         $userId = auth()->id();
-        
+
         // MODIFIED: Tambahkan query builder untuk pencarian
         $query = Surat::where('user_id', $userId);
 
@@ -198,7 +200,7 @@ class SuratController extends Controller
         return redirect()->route('surat.status_surat')->with('success', 'Surat yang dipilih berhasil dihapus.');
     }
 
-        public function uploadPdf(Request $request)
+    public function uploadPdf(Request $request)
     {
         // 1. Validasi request
         $request->validate([
@@ -223,5 +225,4 @@ class SuratController extends Controller
         // 4. Redirect kembali dengan pesan sukses
         return redirect()->route('surat.index')->with('success', 'File surat berhasil diunggah.');
     }
-
 }
