@@ -15,6 +15,7 @@ window.initCkeditor = function (editorSelector, hiddenInputSelector) {
             "undo",
             "redo",
         ],
+
         table: {
             contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"],
         },

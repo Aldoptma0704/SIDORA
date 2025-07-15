@@ -7,22 +7,39 @@ use Illuminate\Http\Request;
 use App\Models\Surat;
 use Mews\Purifier\Facades\Purifier;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class SuratController extends Controller
 {
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $userId = auth()->id();
-        $jenis = $request->query('jenis'); // Ambil parameter 'jenis' dari URL
+        $jenis = $request->query('jenis');
 
-        $query = Surat::where(function ($q) use ($userId) {
-            $q->where('user_id', $userId)
-                ->orWhere('disposisi_user_id', $userId); // Tambahkan surat disposisi
-        });
+        $query = Surat::query();
 
-        if ($jenis && in_array($jenis, ['masuk', 'keluar'])) {
-            $query->where('jenis', $jenis);
+        if ($jenis === 'masuk') {
+            // Halaman Surat Masuk: Tampilkan surat yang didisposisikan ke user ini (semua status)
+            $query->where('disposisi_user_id', $userId);
+
+        } elseif ($jenis === 'keluar') {
+            // Halaman Surat Keluar: HANYA tampilkan surat DRAFT yang dibuat oleh user ini
+            $query->where('user_id', $userId)
+                  ->whereIn('jenis', ['keluar', 'keluar_full'])
+                  ->where('status', 'draft'); // <-- Perubahan Kunci di sini
+
+        } else { // Halaman "Semua Surat"
+            // Tampilkan surat yang dibuat (tapi hanya draft) ATAU didisposisikan ke user ini (semua status)
+            $query->where(function ($q) use ($userId) {
+                // Surat Keluar yang masih draft
+                $q->where(function($subq) use ($userId) {
+                    $subq->where('user_id', $userId)
+                         ->where('status', 'draft');
+                })
+                // ATAU Surat Masuk (disposisi) dengan status apapun
+                ->orWhere('disposisi_user_id', $userId);
+            });
         }
 
         $surats = $query->latest()->get();
@@ -40,56 +57,56 @@ class SuratController extends Controller
 
     public function store(Request $request)
     {
-        // Log isi request
-        Log::info('Data Request Surat:', $request->all());
+        Log::info('Data Request Surat Store:', $request->all());
 
-        // Validasi dasar
-        $validated = $request->validate([
-            'jenis' => 'required|in:masuk,keluar',
-            'judul' => 'required|string|max:255', // Judul/Hal
+        $jenis = $request->input('jenis');
+
+        // Aturan validasi dasar yang berlaku untuk semua jenis
+        $rules = [
+            'jenis' => 'required|in:keluar,keluar_full',
+            'judul' => 'required|string|max:255',
             'isi' => 'required|string',
-            'lampiran' => 'required|string|max:100'
-        ]);
-
-        // Validasi kondisional untuk surat keluar
-        if ($request->jenis == 'keluar') {
-            $request->validate([
-                'nomor_surat' => 'required|string|max:255',
-                'sifat' => 'required|string|max:100',
-                'tujuan' => 'required|string',
-                'penandatangan_jabatan' => 'required|string',
-                'penandatangan_nama' => 'required|string',
-                'penandatangan_nip' => 'required|string',
-            ]);
+            'nomor_surat' => 'required|string|max:255',
+            'sifat' => 'required|string|max:100',
+            'lampiran' => 'required|string|max:100',
+            'tujuan' => 'required|string',
+            'penandatangan_jabatan' => 'required|string|max:255',
+            'penandatangan_nama' => 'required|string|max:255',
+            'penandatangan_nip' => 'required|string|max:255',
+        ];
+        if ($request->input('jenis') === 'keluar_full') {
+            $rules['nama_instansi'] = 'required|string';
+            $rules['alamat_instansi'] = 'required|string';
+            $rules['kontak_instansi'] = 'required|string';
+            $rules['logo_instansi_file'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
         }
+        $validatedData = $request->validate($rules);
 
-        // Buat instance Surat
         $surat = new Surat();
         $surat->user_id = auth()->id();
-        $surat->jenis = $request->jenis;
-        $surat->judul = $request->judul;
-        $surat->isi = Purifier::clean($request->isi);
-        $surat->status = 'menunggu';
-        $surat->lampiran = $request->lampiran;
-
-        if ($request->jenis == 'keluar') {
-            $surat->nomor_surat = $request->nomor_surat;
-            $surat->sifat = $request->sifat;
-            $surat->tujuan = $request->tujuan;
-            $surat->penandatangan_jabatan = $request->penandatangan_jabatan;
-            $surat->penandatangan_nama = $request->penandatangan_nama;
-            $surat->penandatangan_nip = $request->penandatangan_nip;
+        $surat->fill($validatedData);
+        $surat->isi = Purifier::clean($validatedData['isi']);
+        
+        if ($request->input('jenis') === 'keluar_full') {
+            $surat->nama_instansi = Purifier::clean($request->nama_instansi);
+            $surat->alamat_instansi = Purifier::clean($request->alamat_instansi);
+            $surat->kontak_instansi = Purifier::clean($request->kontak_instansi);
+            if ($request->hasFile('logo_instansi_file')) {
+                $path = $request->file('logo_instansi_file')->store('logos', 'public');
+                $surat->logo_instansi = $path;
+            }
         }
-
+        
+        $surat->status = 'draft'; 
         $surat->save();
 
-        return redirect()->route('surat.preview', $surat->id);
+        // FIXED: Redirect ke route 'surat.index' tidak memerlukan parameter
+        return redirect()->route('surat.index')->with('success', 'Draft surat berhasil dibuat!');
     }
 
     public function preview($id)
     {
         $surat = Surat::findOrFail($id);
-
         return view('pegawai.surat.preview_surat', compact('surat'));
     }
 
@@ -99,79 +116,97 @@ class SuratController extends Controller
         return view('pegawai.surat.edit', compact('surat'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified surat in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+        public function update(Request $request, $id)
     {
-        // Temukan surat yang akan diupdate
         $surat = Surat::findOrFail($id);
+        $jenis = $request->jenis;
 
-        // Validasi dasar (sama seperti store, bisa disesuaikan)
-        $validated = $request->validate([
-            'jenis' => 'required|in:masuk,keluar',
+        $validatedData = $request->validate([
+            'jenis' => 'required|in:keluar,keluar_full',
             'judul' => 'required|string|max:255',
             'isi' => 'required|string',
+            'nomor_surat' => 'required|string|max:255',
+            'sifat' => 'required|string|max:100',
             'lampiran' => 'required|string|max:100',
+            'tujuan' => 'required|string',
+            'penandatangan_jabatan' => 'required|string|max:255',
+            'penandatangan_nama' => 'required|string|max:255',
+            'penandatangan_nip' => 'required|string|max:255',
+            
+            // Aturan untuk field kop surat (tidak wajib)
+            'nama_instansi' => 'nullable|string',
+            'alamat_instansi' => 'nullable|string',
+            'kontak_instansi' => 'nullable|string',
+            'logo_instansi_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Validasi kondisional untuk surat keluar
-        if ($request->jenis == 'keluar') {
-            $request->validate([
-                'nomor_surat' => 'required|string|max:255',
-                'sifat' => 'required|string|max:100',
-                'tujuan' => 'required|string',
-                'penandatangan_jabatan' => 'required|string',
-                'penandatangan_nama' => 'required|string',
-                'penandatangan_nip' => 'required|string',
-            ]);
-        }
+        // Gunakan data yang sudah divalidasi
+        $surat->jenis = $validatedData['jenis'];
+        $surat->judul = $validatedData['judul'];
+        $surat->isi = Purifier::clean($validatedData['isi']);
+        $surat->nomor_surat = $validatedData['nomor_surat'];
+        $surat->sifat = $validatedData['sifat'];
+        $surat->lampiran = $validatedData['lampiran'];
+        $surat->tujuan = $validatedData['tujuan'];
+        $surat->penandatangan_jabatan = $validatedData['penandatangan_jabatan'];
+        $surat->penandatangan_nama = $validatedData['penandatangan_nama'];
+        $surat->penandatangan_nip = $validatedData['penandatangan_nip'];
+        $surat->status = 'menunggu'; // Reset status menjadi 'menunggu' setiap kali diupdate
 
-        // Update data surat
-        $surat->jenis = $request->jenis;
-        $surat->judul = $request->judul;
-        $surat->isi = Purifier::clean($request->isi);
-        $surat->status = 'menunggu'; // Reset status jika ada perubahan
+        if ($jenis == 'keluar_full') {
+            // Isi data kop surat
+            $surat->nama_instansi = Purifier::clean($request->nama_instansi);
+            $surat->alamat_instansi = Purifier::clean($request->alamat_instansi);
+            $surat->kontak_instansi = Purifier::clean($request->kontak_instansi);
+            
+            // Handle file upload untuk logo jika ada
+            if ($request->hasFile('logo_instansi_file')) {
+                // Hapus logo lama jika ada
+                // Storage::delete('public/' . $surat->logo_instansi);
+                $path = $request->file('logo_instansi_file')->store('logos', 'public');
+                $surat->logo_instansi = $path;
+            }
 
-        if ($request->jenis == 'keluar') {
-            $surat->nomor_surat = $request->nomor_surat;
-            $surat->sifat = $request->sifat;
-            $surat->lampiran = $request->lampiran;
-            $surat->tujuan = $request->tujuan;
-            $surat->penandatangan_jabatan = $request->penandatangan_jabatan;
-            $surat->penandatangan_nama = $request->penandatangan_nama;
-            $surat->penandatangan_nip = $request->penandatangan_nip;
         } else {
-            // Kosongkan field surat keluar jika jenis diubah ke surat masuk
-            $surat->nomor_surat = null;
-            $surat->sifat = null;
-            // $surat->lampiran = null; // Lampiran tetap ada di validasi dasar
-            $surat->tujuan = null;
-            $surat->penandatangan_jabatan = null;
-            $surat->penandatangan_nama = null;
-            $surat->penandatangan_nip = null;
+            // Kosongkan data kop surat jika jenisnya diubah menjadi template standar
+            $surat->nama_instansi = null;
+            $surat->alamat_instansi = null;
+            $surat->kontak_instansi = null;
+            $surat->logo_instansi = null; // Hapus path logo juga
         }
 
         $surat->save();
 
-        // Redirect kembali ke halaman preview setelah update
         return redirect()->route('surat.preview', $surat->id)->with('success', 'Surat berhasil diperbarui!');
     }
 
-    // Generate PDF
     public function download($id)
     {
         $surat = Surat::findOrFail($id);
-
+        
+        // Buat nama file yang aman dengan mengganti '/' menjadi '-'
+        $safeFileName = str_replace('/', '-', $surat->nomor_surat);
+        
         $pdf = \PDF::loadView('pegawai.surat.pdf_surat', compact('surat'))
-            ->setPaper('A4', 'portrait');
-
-        return $pdf->download('surat_' . $surat->nomor_surat . '.pdf');
+                     ->setPaper('A4', 'portrait');
+        
+        // Gunakan nama file yang sudah aman
+        return $pdf->download('surat_' . $safeFileName . '.pdf');
     }
-
-    public function statusSurat(Request $request) // MODIFIED: Tambahkan Request $request
+    
+    public function statusSurat(Request $request)
     {
         $userId = auth()->id();
 
-        // MODIFIED: Tambahkan query builder untuk pencarian
-        $query = Surat::where('user_id', $userId);
+        $query = Surat::where('user_id', $userId)
+                    ->where('status', '!=', 'draft');
 
         if ($request->has('search') && $request->search != '') {
             $query->where('judul', 'like', '%' . $request->search . '%');
@@ -179,15 +214,63 @@ class SuratController extends Controller
 
         $surats = $query->latest()->get();
 
-        return view('pegawai.status_surat', [
+        $drafts = Surat::where('user_id', $userId)
+               ->where('status', 'draft')
+               ->latest()
+               ->get();
+
+        return view('pegawai.surat.status_surat', [
             'jumlahMenunggu' => Surat::where('user_id', $userId)->where('status', 'menunggu')->count(),
             'jumlahDisetujui' => Surat::where('user_id', $userId)->where('status', 'disetujui')->count(),
             'jumlahDitolak' => Surat::where('user_id', $userId)->where('status', 'ditolak')->count(),
-            'surats' => $surats // Kirim data surat yang sudah difilter
+            'surats' => $surats,
+            'drafts' => $drafts,
         ]);
     }
 
-    // ADDED: Method baru untuk hapus massal
+    public function ajukan(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:surats,id',
+        ]);
+
+        Surat::whereIn('id', $request->ids)
+             ->where('user_id', auth()->id())
+             ->where('status', 'draft')
+             ->update(['status' => 'menunggu']);
+
+        return redirect()->route('surat.status_surat')->with('success', 'Surat berhasil diajukan untuk persetujuan.');
+    }
+
+    public function destroy($id)
+    {
+        $surat = Surat::findOrFail($id);
+
+        // Otorisasi: Pastikan hanya pemilik surat yang bisa menghapus,
+        // dan hanya jika statusnya masih 'draft'.
+        if ($surat->user_id != auth()->id()) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menghapus surat ini.');
+        }
+
+        // Khususnya untuk draft, kita berikan izin hapus
+        if ($surat->status != 'draft') {
+             return redirect()->back()->with('error', 'Hanya surat dengan status draft yang bisa dihapus.');
+        }
+
+        // Hapus file terkait jika ada (logo atau file PDF yang diupload)
+        if ($surat->logo_instansi) {
+            Storage::disk('public')->delete($surat->logo_instansi);
+        }
+        if ($surat->file_path) {
+            Storage::disk('public')->delete($surat->file_path);
+        }
+
+        $surat->delete();
+
+        return redirect()->route('surat.index')->with('success', 'Draft surat berhasil dihapus.');
+    }
+    
     public function bulkDelete(Request $request)
     {
         $request->validate([
@@ -195,34 +278,52 @@ class SuratController extends Controller
             'ids.*' => 'exists:surats,id',
         ]);
 
-        Surat::whereIn('id', $request->ids)->delete();
+        $suratIds = $request->input('ids');
+        $userId = auth()->id();
 
-        return redirect()->route('surat.status_surat')->with('success', 'Surat yang dipilih berhasil dihapus.');
+        $suratsToDelete = Surat::where('user_id', $userId)
+                               ->whereIn('id', $suratIds)
+                               ->get();
+
+        if ($suratsToDelete->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada surat yang valid untuk dihapus.');
+        }
+
+        foreach ($suratsToDelete as $surat) {
+            // Hapus file terkait jika ada
+            if ($surat->logo_instansi) {
+                Storage::disk('public')->delete($surat->logo_instansi);
+            }
+            if ($surat->file_path) {
+                Storage::disk('public')->delete($surat->file_path);
+            }
+            // Hapus record surat dari database
+            $surat->delete();
+        }
+
+        return redirect()->back()->with('success', 'Surat yang dipilih berhasil dihapus.');
     }
 
     public function uploadPdf(Request $request)
     {
-        // 1. Validasi request
         $request->validate([
-            'file_surat' => 'required|mimes:pdf|max:5120', // Hanya PDF, maks 5MB
+            'file_surat' => 'required|mimes:pdf|max:5120',
         ]);
 
-        // 2. Simpan file
         $file = $request->file('file_surat');
         $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('surat_files', $fileName, 'public'); // Simpan di storage/app/public/surat_files
+        $filePath = $file->storeAs('surat_files', $fileName, 'public');
 
-        // 3. Buat record surat baru di database
         $surat = new Surat();
         $surat->user_id = auth()->id();
-        $surat->jenis = 'masuk'; // Default jenis surat 'masuk' untuk file yang di-upload
-        $surat->judul = pathinfo($fileName, PATHINFO_FILENAME); // Judul diambil dari nama file
-        $surat->isi = 'File PDF diunggah.'; // Isi default
+        $surat->jenis = 'keluar';
+        $surat->judul = pathinfo($fileName, PATHINFO_FILENAME);
+        $surat->isi = 'File PDF diunggah.';
         $surat->file_path = $filePath;
-        $surat->status = 'menunggu'; // Status default
+        $surat->status = 'menunggu';
         $surat->save();
 
-        // 4. Redirect kembali dengan pesan sukses
         return redirect()->route('surat.index')->with('success', 'File surat berhasil diunggah.');
     }
 }
+

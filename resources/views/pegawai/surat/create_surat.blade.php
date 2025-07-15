@@ -1,30 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="max-w-4xl mx-auto bg-white p-6 rounded shadow"
+     x-data="suratForm()">
 
-<div class="max-w-4xl mx-auto bg-white p-6 rounded shadow" 
-     x-data="{
-        jenis: '{{ old('jenis') }}',
-        editorMasukInitialized: false,
-        editorKeluarInitialized: false,
-        initEditorMasuk() {
-            if (this.jenis === 'masuk' && !this.editorMasukInitialized) {
-                window.initCkeditor('#editor_masuk', '#isi_masuk');
-                this.editorMasukInitialized = true;
-            }
-        },
-        initEditorKeluar() {
-            if (this.jenis === 'keluar' && !this.editorKeluarInitialized) {
-                window.initCkeditor('#editor_keluar', '#isi_keluar_hidden');
-                this.editorKeluarInitialized = true;
-            }
-        }
-     }">
     <h2 class="text-xl font-semibold mb-6 text-gray-700">Buat Surat Baru</h2>
 
     @if ($errors->any())
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-        <p class="font-bold">Terjadi Kesalahan</p>
+        <p class="font-bold">Terjadi Kesalahan Validasi</p>
         <ul>
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -33,78 +17,87 @@
     </div>
     @endif
     
-    <form action="{{ route('surat.store') }}" method="POST">
+    <form action="{{ route('surat.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div class="mb-4">
-            <label for="jenis" class="block text-sm font-medium text-gray-700">Jenis Surat</label>
-            <select name="jenis" id="jenis" x-model="jenis" @change="initEditorMasuk(); initEditorKeluar();" class="w-full mt-1 p-2 border rounded shadow-sm focus:ring focus:border-blue-300" required>
-                <option value="">-- Pilih Jenis --</option>
-                <option value="masuk">Surat Masuk</option>
-                <option value="keluar">Surat Keluar</option>
+            <label class="block text-sm font-medium text-gray-700">Jenis Surat</label>
+            <select name="jenis" x-model="jenis" class="w-full mt-1 p-2 border-2 border-gray-300 rounded shadow-sm" required>
+                {{-- Opsi default yang dinonaktifkan --}}
+                <option value="" disabled>-- Pilih Jenis Surat --</option>
+                <option value="keluar_full">Surat Keluar (Dengan Kop Surat)</option>
+                <option value="keluar">Surat Keluar (Template Standar)</option>
             </select>
         </div>
 
-        <div x-cloak x-show="jenis">
-            {{-- Form Surat Masuk --}}
-            <div x-show="jenis === 'masuk'" x-transition x-init="initEditorMasuk()">
-                <div class="border-t border-gray-200 pt-4 mt-4">
-                    <p class="text-lg font-semibold text-gray-600 mb-4">Detail Surat Masuk</p>
-                    <div class="mb-4">
-                        <label for="judul_masuk" class="block text-sm font-medium text-gray-700">Judul / Perihal Surat</label>
-                        <input type="text" id="judul_masuk" name="judul" value="{{ old('judul') }}" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'masuk'">
+        {{-- Seluruh form di bawah ini hanya akan muncul jika 'jenis' sudah dipilih --}}
+        <div x-show="jenis" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0">
+
+            {{-- KOP SURAT (Hanya untuk 'keluar_full') --}}
+            <div x-show="jenis === 'keluar_full'" x-transition class="border-t border-gray-200 pt-4 mt-4">
+                <p class="text-lg font-semibold text-gray-600 mb-4">Header Surat</p>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Logo Instansi</label>
+                    <input type="file" name="logo_instansi_file" accept="image/*" class="w-full mt-1 p-2 border rounded shadow-sm">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nama Instansi</label>
+                        <div id="editor_nama_instansi" class="w-full border p-2 min-h-[60px]">{!! old('nama_instansi') !!}</div>
+                        <input type="hidden" name="nama_instansi" value="{{ old('nama_instansi') }}">
                     </div>
-                    <div class="mb-4">
-                        <label for="isi_masuk" class="block text-sm font-medium text-gray-700">Isi Ringkas</label>
-                        <div id="editor_masuk" class="bg-white border rounded shadow-sm min-h-[200px] p-2"></div>
-                        <input type="hidden" name="isi" id="isi_masuk" value="{{ old('isi') }}">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">No. Telepon / Kontak</label>
+                        <div id="editor_kontak_instansi" class="w-full border p-2 min-h-[60px]">{!! old('kontak_instansi') !!}</div>
+                        <input type="hidden" name="kontak_instansi" value="{{ old('kontak_instansi') }}">
                     </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Alamat Instansi</label>
+                    <div id="editor_alamat_instansi" class="w-full border p-2 min-h-[60px]">{!! old('alamat_instansi') !!}</div>
+                    <input type="hidden" name="alamat_instansi" value="{{ old('alamat_instansi') }}">
                 </div>
             </div>
 
-            {{-- Form Surat Keluar --}}
-            <div x-show="jenis === 'keluar'" x-transition x-init="initEditorKeluar()">
-                <div class="border-t border-gray-200 pt-4 mt-4">
-                    <p class="text-lg font-semibold text-gray-600 mb-4">Detail Surat Keluar</p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="nomor_surat" class="block text-sm font-medium text-gray-700">Nomor Surat</label>
-                            <input type="text" name="nomor_surat" id="nomor_surat" value="{{ old('nomor_surat') }}" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">
-                        </div>
-                        <div>
-                            <label for="sifat" class="block text-sm font-medium text-gray-700">Sifat</label>
-                            <input type="text" name="sifat" id="sifat" value="{{ old('sifat', 'Biasa') }}" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">
-                        </div>
-                        <div>
-                            <label for="lampiran" class="block text-sm font-medium text-gray-700">Lampiran</label>
-                            <input type="text" name="lampiran" id="lampiran" value="{{ old('lampiran', '-') }}" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">
-                        </div>
-                        <div>
-                            <label for="judul_keluar" class="block text-sm font-medium text-gray-700">Hal (Perihal)</label>
-                            <input type="text" name="judul" id="judul_keluar" value="{{ old('judul') }}" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">
-                        </div>
+            {{-- ISI SURAT (Bagian ini umum untuk semua jenis surat keluar) --}}
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <p class="text-lg font-semibold text-gray-600 mb-4">Detail Surat Keluar</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nomor Surat</label>
+                        <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}" class="w-full mt-1 p-2 border rounded shadow-sm">
                     </div>
-
-                    <div class="mt-4">
-                        <label for="tujuan" class="block text-sm font-medium text-gray-700">Tujuan Surat</label>
-                        <textarea name="tujuan" id="tujuan" rows="4" class="w-full mt-1 p-2 border rounded shadow-sm" placeholder="Yth. Dekan Fakultas MIPA..." :disabled="jenis !== 'keluar'">{{ old('tujuan') }}</textarea>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Sifat</label>
+                        <input type="text" name="sifat" value="{{ old('sifat', 'Biasa') }}" class="w-full mt-1 p-2 border rounded shadow-sm">
                     </div>
-
-                    <div class="mt-4">
-                        <label for="editor_keluar" class="block text-sm font-medium text-gray-700">Isi Surat</label>
-                        <div id="editor_keluar" class="w-full border p-2 min-h-[200px]"></div>
-                        {{-- ID hidden input ini harus unik dan sesuai dengan yang dipanggil di x-data --}}
-                        <input type="hidden" name="isi" id="isi_keluar_hidden" value="{{ old('isi') }}">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Lampiran</label>
+                        <input type="text" name="lampiran" value="{{ old('lampiran', '-') }}" class="w-full mt-1 p-2 border rounded shadow-sm">
                     </div>
-
-                    <hr class="my-6">
-                    <p class="text-lg font-semibold text-gray-600 mb-4">Detail Penandatangan</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" name="penandatangan_jabatan" value="{{ old('penandatangan_jabatan') }}" placeholder="Jabatan (e.g., Plh. KEPALA DINAS,)" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">
-                        <input type="text" name="penandatangan_nama" value="{{ old('penandatangan_nama') }}" placeholder="Nama Lengkap & Gelar" class="w-full mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">
-                        <textarea name="penandatangan_nip" placeholder="Pangkat & NIP" rows="2" class="w-full md:col-span-2 mt-1 p-2 border rounded shadow-sm" :disabled="jenis !== 'keluar'">{{ old('penandatangan_nip') }}</textarea>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Hal (Perihal)</label>
+                        <input type="text" name="judul" value="{{ old('judul') }}" class="w-full mt-1 p-2 border rounded shadow-sm">
                     </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Tujuan Surat</label>
+                    <textarea name="tujuan" rows="3" class="w-full mt-1 p-2 border rounded shadow-sm">{{ old('tujuan') }}</textarea>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Isi Surat</label>
+                    <div id="editor_isi" class="w-full border p-2 min-h-[200px]">{!! old('isi') !!}</div>
+                    <input type="hidden" name="isi" id="isi_hidden" value="{{ old('isi') }}">
+                </div>
+            </div>
+
+            {{-- PENANDATANGAN (Bagian ini juga umum) --}}
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <p class="text-lg font-semibold text-gray-600 mb-4">Detail Penandatangan</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="penandatangan_jabatan" value="{{ old('penandatangan_jabatan') }}" placeholder="Jabatan (e.g., Plh. KEPALA DINAS,)" class="w-full mt-1 p-2 border rounded shadow-sm">
+                    <input type="text" name="penandatangan_nama" value="{{ old('penandatangan_nama') }}" placeholder="Nama Lengkap & Gelar" class="w-full mt-1 p-2 border rounded shadow-sm">
+                    <textarea name="penandatangan_nip" placeholder="Pangkat & NIP" rows="2" class="w-full md:col-span-2 mt-1 p-2 border rounded shadow-sm">{{ old('penandatangan_nip') }}</textarea>
                 </div>
             </div>
 
@@ -115,4 +108,62 @@
         </div>
     </form>
 </div>
+
+<script>
+    function suratForm() {
+        return {
+            // Nilai awal 'jenis' adalah kosong, atau nilai lama jika ada error validasi
+            jenis: '{{ old('jenis', '') }}',
+            editorsInitialized: {
+                isi: false,
+                header: false
+            },
+            
+            init() {
+                // Jika halaman dimuat dengan nilai 'jenis' (karena error validasi),
+                // langsung inisialisasi editor yang sesuai.
+                if (this.jenis) {
+                    this.initAllEditors();
+                }
+
+                // Awasi perubahan pada dropdown 'jenis'
+                this.$watch('jenis', () => {
+                    this.initAllEditors();
+                });
+            },
+
+            initAllEditors() {
+                // Jangan lakukan apa-apa jika belum ada jenis yang dipilih
+                if (!this.jenis) {
+                    return;
+                }
+
+                this.$nextTick(() => {
+                    // Inisialisasi editor isi surat (hanya sekali)
+                    if (!this.editorsInitialized.isi) {
+                        this.createEditor('#editor_isi', '#isi_hidden');
+                        this.editorsInitialized.isi = true;
+                    }
+
+                    // Inisialisasi editor header jika jenisnya 'keluar_full' (hanya sekali)
+                    if (this.jenis === 'keluar_full' && !this.editorsInitialized.header) {
+                        this.createEditor('#editor_nama_instansi', 'input[name=nama_instansi]');
+                        this.createEditor('#editor_kontak_instansi', 'input[name=kontak_instansi]');
+                        this.createEditor('#editor_alamat_instansi', 'input[name=alamat_instansi]');
+                        this.editorsInitialized.header = true;
+                    }
+                });
+            },
+
+            // Fungsi pembantu untuk membuat instance CKEditor
+            createEditor(editorSelector, hiddenInputSelector) {
+                const element = document.querySelector(editorSelector);
+                if (!element) return;
+
+                // Menggunakan fungsi initCkeditor global Anda
+                window.initCkeditor(editorSelector, hiddenInputSelector);
+            }
+        }
+    }
+</script>
 @endsection

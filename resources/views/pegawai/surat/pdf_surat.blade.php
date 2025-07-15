@@ -2,146 +2,236 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat {{ $surat->nomor_surat }}</title>
+    <title>Surat {{ $surat->nomor_surat ?? 'Surat Dinas' }}</title>
     <style>
+        @page {
+            margin: 2.5cm;
+        }
         body {
-            font-family: 'Arial', sans-serif;
-            font-size: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
             color: #000;
-            line-height: 1.6;
-            margin: 40px;
+            line-height: 1.5;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
         }
 
-        .header {
+        /* Styling untuk Kop Surat */
+        .header-table td {
+            vertical-align: top;
             text-align: center;
         }
-
-        .logo-text {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .header-table .logo {
+            width: 90px;
+            text-align: center;
+        }
+        .header-table .logo img {
+            height: 85px;
+        }
+        .header-table h1 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .header-table h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .header-table .address {
+            font-size: 10pt;
+            margin: 0;
+        }
+        
+        /* Styling untuk nama instansi pada header dinamis */
+        .dynamic-header .ql-editor p {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+            font-size: 14pt;
+        }
+        
+        /* Aturan khusus untuk menimpa style pada alamat & kontak dinamis */
+        .dynamic-header .address.ql-editor p {
+            font-weight: normal;      /* Tidak tebal */
+            text-transform: none;     /* Tidak uppercase */
+            font-size: 10pt;          /* Ukuran font lebih kecil */
         }
 
-        .logo-text img {
-            height: 80px;
+        .dynamic-header .ql-editor {
+            padding: 0; /* Hapus padding default ql-editor */
         }
 
-        hr {
-            border: 1.5px solid black;
-            margin-top: 10px;
+        .line {
+            border-top: 3px solid black;
+            border-bottom: 1px solid black;
+            height: 2px;
+            margin-top: 8px;
             margin-bottom: 20px;
         }
-
-        .table-info {
-            width: 60%;
-            margin-bottom: 10px;
-            border-spacing: 0;
-        }
-
-        .table-info td {
-            padding: 2px 6px;
-            vertical-align: top;
-        }
-
-        .table-info td.label {
-            width: 80px;
-            text-align: left;
-            white-space: nowrap;
-        }
-
-        .ttd {
-            margin-top: 80px;
+        
+        .text-right {
             text-align: right;
         }
 
-        /* Border hanya untuk tabel isi surat */
-        .isi-tabel {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 10px;
+        .info-table {
+            margin-bottom: 20px;
+        }
+        .info-table td {
+            padding: 1px 0;
+            vertical-align: top;
+        }
+        .info-table .label {
+            width: 100px;
         }
 
-        .isi-tabel th, .isi-tabel td {
+        .content {
+            margin-top: 20px;
+            text-align: justify;
+        }
+
+        .ql-editor table {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .ql-editor th, .ql-editor td {
             border: 1px solid #000;
-            padding: 6px;
+            padding: 8px;
+            font-size: 12pt;
+        }
+        .ql-editor th {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+
+        .signature-table {
+            margin-top: 40px;
+        }
+        .signature-table td {
+            vertical-align: top;
+        }
+        /* MODIFIED: Lebar kolom kosong ditambah untuk mendorong tanda tangan lebih ke kanan */
+        .signature-table .spacer-column {
+            width: 95%;
+        }
+        /* MODIFIED: Lebar kolom tanda tangan disesuaikan */
+        .signature-table .signature-column {
+            width: 40%;
             text-align: left;
         }
-
-        strong, b {
+        .signature-table .spacer {
+            height: 60px;
+        }
+        .signature-table .name {
             font-weight: bold;
-        }
-
-        em, i {
-            font-style: italic;
-        }
-
-        p {
-            margin: 6px 0;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    {{-- Header Logo + Identitas --}}
-    <table width="100%" style="margin-bottom: 10px;">
-        <tr>
-            <td style="width: 80px; padding-left: 50px;">
-                <img src="{{ public_path('img/logo_lampung.png') }}" alt="Logo" style="height: 80px;">
-            </td>
-            <td style="text-align: center; padding-right: 68px;">
-                <h2 style="margin: 0; font-size: 16px;">PEMERINTAH PROVINSI LAMPUNG</h2>
-                <h3 style="margin: 0; font-size: 16px;">DINAS TENAGA KERJA</h3>
-                <p style="margin: 0; font-size: 11px;">
-                    Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856
-                </p>
-                <p style="margin: 0; font-size: 11px;">
-                    Laman: <u style="color:blue;">https://disnaker.lampungprov.go.id</u> |
-                    Pos-el: <u style="color:blue;">lampungnaker@gmail.com</u>
-                </p>
-            </td>
-        </tr>
-    </table>
 
-    <hr style="border: 1.5px solid black; margin-top: 0; margin-bottom: 20px;">
+    {{-- ==================================================================== --}}
+    {{-- BLOK HEADER SURAT KONDISIONAL --}}
+    @if ($surat->jenis === 'keluar_full')
+        <table class="header-table">
+            <tr>
+                <td class="logo">
+                    @if ($surat->logo_instansi)
+                        <img src="{{ public_path('storage/' . $surat->logo_instansi) }}" alt="Logo">
+                    @endif
+                </td>
+                <td class="dynamic-header">
+                    {{-- Nama Instansi akan menggunakan style default .dynamic-header --}}
+                    <div class="ql-editor">{!! $surat->nama_instansi !!}</div>
+                    
+                    {{-- Alamat & Kontak akan menggunakan style override dari .address --}}
+                    <div class="ql-editor address">{!! $surat->alamat_instansi !!}</div>
+                    <div class="ql-editor address">{!! $surat->kontak_instansi !!}</div>
+                </td>
+            </tr>
+        </table>
+        <div class="line"></div>
 
-    <p style="text-align: right;">Bandar Lampung, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+    @else
+        <table class="header-table">
+            <tr>
+                <td class="logo">
+                    <img src="{{ public_path('img/logo_lampung.png') }}" alt="Logo">
+                </td>
+                <td>
+                    <h1>PEMERINTAH PROVINSI LAMPUNG</h1>
+                    <h2>DINAS TENAGA KERJA</h2>
+                    <p class="address">Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856</p>
+                    <p class="address">
+                        Laman: <a href="#">https://disnaker.lampungprov.go.id</a> |
+                        Pos-el: <a href="#">lampungnaker@gmail.com</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+        <div class="line"></div>
+    @endif
+    {{-- ==================================================================== --}}
 
-    {{-- Informasi Surat --}}
-    <table class="table-info">
+    <p class="text-right">Bandar Lampung, {{ $surat->created_at->translatedFormat('d F Y') }}</p>
+
+    <table class="info-table">
         <tr>
             <td class="label">Nomor</td>
-            <td>: {{ $surat->nomor_surat ?? '-' }}</td>
+            <td>:</td>
+            <td>{{ $surat->nomor_surat ?? '-' }}</td>
         </tr>
         <tr>
             <td class="label">Sifat</td>
-            <td>: {{ $surat->sifat ?? '-' }}</td>
+            <td>:</td>
+            <td>{{ $surat->sifat ?? '-' }}</td>
         </tr>
         <tr>
             <td class="label">Lampiran</td>
-            <td>: {{ $surat->lampiran ?? '-' }}</td>
+            <td>:</td>
+            <td>{{ $surat->lampiran ?? '-' }}</td>
         </tr>
         <tr>
             <td class="label">Hal</td>
-            <td>: {{ $surat->judul }}</td>
+            <td>:</td>
+            <td><strong>{{ $surat->judul }}</strong></td>
         </tr>
     </table>
 
-    <p>Yth. {{ $surat->tujuan }}</p>
-    <p>Di — BANDAR LAMPUNG</p>
-
-    <p>Sehubungan dengan hal tersebut, kami sampaikan bahwa:</p>
-
-    {{-- Isi Surat --}}
-    {!! str_replace('<table', '<table class="isi-tabel"', $surat->isi) !!}
-
-    <p>Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
-
-    {{-- Tanda Tangan --}}
-    <div class="ttd">
-        <p>Hormat kami,</p>
-        <br><br><br>
-        <p><strong>{{ $surat->penandatangan_nama }}</strong></p>
-        <p>{{ $surat->penandatangan_jabatan }}</p>
-        <p>NIP. {{ $surat->penandatangan_nip }}</p>
+    <div class="content">
+        <p>Yth. {{ $surat->tujuan ?? '...........................................' }}</p>
+        <p style="margin-bottom: 20px;">Di — <strong>BANDAR LAMPUNG</strong></p>
+        
+        <div class="ql-editor">{!! $surat->isi !!}</div>
+        
+        <p style="margin-top: 20px;">Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
     </div>
+
+    <table class="signature-table">
+        <tr>
+            <td class="spacer-column">&nbsp;</td>
+            <td class="signature-column">
+                <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
+                <div class="spacer">
+                    @if ($surat->status === 'disetujui' && $surat->signed_at)
+                        <img src="data:image/png;base64, {!! base64_encode(
+                            QrCode::format('png')->size(80)->generate(
+                                url('/verify-surat/' . $surat->id)
+                            )
+                        ) !!}" alt="QR Code">
+                    @endif
+                </div>
+                <p class="name">{{ $surat->penandatangan_nama ?? 'Nama Pejabat' }}</p>
+                <p>NIP. {{ $surat->penandatangan_nip ?? '..........' }}</p>
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>
