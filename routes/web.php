@@ -50,7 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 // ---------------- Pegawai ----------------
 Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->group(function () {
     Route::get('/dashboard', [PegawaiDashboardController::class, 'index'])->name('pegawai.dashboard');
-    Route::get('/status_surat', [PegawaiDashboardController::class, 'statusSurat'])->name('surat.status_surat');
+    Route::get('/status_surat', [PegawaiSuratController::class, 'statusSurat'])->name('surat.status_surat');
     Route::post('/surat', [PegawaiSuratController::class, 'store'])->name('surat.store');
     Route::get('/surat', [PegawaiSuratController::class, 'index'])->name('surat.index');
 
@@ -61,9 +61,12 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->group(function (
     Route::get('/surat/{id}/download', [PegawaiSuratController::class, 'download'])->name('surat.download');
     Route::get('/surat/{id}/edit', [PegawaiSuratController::class, 'edit'])->name('surat.edit');
     Route::put('/surat/{id}', [PegawaiSuratController::class, 'update'])->name('surat.update');
+    Route::delete('/surat/{id}', [PegawaiSuratController::class, 'destroy'])->name('surat.destroy');
     Route::delete('/surat/bulk-delete', [PegawaiSuratController::class, 'bulkDelete'])->name('surat.bulk_delete');
 
     Route::post('/surat/upload-pdf', [PegawaiSuratController::class, 'uploadPdf'])->name('surat.upload_pdf');
+
+    Route::post('/surat/ajukan', [PegawaiSuratController::class, 'ajukan'])->name('surat.ajukan');
 });
 
 // ---------------- Pimpinan ----------------

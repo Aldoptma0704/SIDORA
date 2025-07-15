@@ -44,6 +44,7 @@
             <h3 class="text-lg font-semibold mb-4">Upload File Surat (PDF)</h3>
             <form action="{{ route('surat.upload_pdf') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="jenis" value="{{ $jenis ?? 'masuk' }}">
                 <div>
                     <label for="file_surat" class="block text-sm font-medium text-gray-700">Pilih File</label>
                     <input type="file" name="file_surat" id="file_surat" accept=".pdf" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
@@ -75,15 +76,26 @@
                     <td class="px-4 py-2 border-b font-medium">
                         {{ $surat->judul }}
                         @if($surat->disposisi_user_id && $surat->disposisi_user_id == auth()->id())
-                            <span class="ml-2 text-xs text-blue-600 bg-blue-50 font-semibold px-2 py-0.5 rounded-full">Disposisi</span>
+                            <span class="ml-2 text-xs text-blue-600 bg-blue-50 font-semibold px-2 py-0.5 rounded-full">Disposisi untuk Anda</span>
                         @endif
                     </td>
-                    <td class="px-4 py-2 border-b capitalize">{{ $surat->jenis }}</td>
+                    <td class="px-4 py-2 border-b">
+                        @php
+                            $jenisDisplay = match($surat->jenis) {
+                                'masuk' => 'Masuk',
+                                'keluar' => 'Keluar (Template)',
+                                'keluar_full' => 'Keluar (Kop Surat)',
+                                default => ucfirst($surat->jenis)
+                            };
+                        @endphp
+                        {{ $jenisDisplay }}
+                    </td>
                     <td class="px-4 py-2 border-b">
                         @php
                             $statusClass = match($surat->status) {
                                 'disetujui' => 'bg-green-100 text-green-800',
                                 'ditolak' => 'bg-red-100 text-red-800',
+                                'draft' => 'bg-gray-100 text-gray-800',
                                 default => 'bg-yellow-100 text-yellow-800'
                             };
                         @endphp
@@ -92,6 +104,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-2 border-b text-center">
+                        {{-- Tombol Lihat/Preview --}}
                         @if ($surat->file_path)
                             <a href="{{ asset('storage/' . $surat->file_path) }}" target="_blank" class="inline-flex items-center px-3 py-1 text-sm text-white bg-gray-600 hover:bg-gray-700 rounded-md shadow">
                                 <i class="fas fa-file-pdf mr-1"></i> Lihat PDF
@@ -101,12 +114,26 @@
                                 <i class="fas fa-eye mr-1"></i> Lihat
                             </a>
                         @endif
+
+                        {{-- ADDED: Tombol Edit & Hapus hanya untuk draft --}}
+                        @if ($surat->status == 'draft' && $surat->user_id == auth()->id())
+                            <a href="{{ route('surat.edit', $surat->id) }}" class="inline-flex items-center px-3 py-1 text-sm text-white bg-yellow-500 hover:bg-yellow-600 rounded-md shadow ml-2">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <form action="{{ route('surat.destroy', $surat->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Anda yakin ingin menghapus draft surat ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center px-3 py-1 text-sm text-white bg-red-600 hover:bg-red-700 rounded-md shadow ml-1">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        @endif
                     </td>
                 </tr>
             @empty
                 <tr>
                     <td colspan="5" class="text-center py-8 text-gray-500">
-                        Belum ada surat yang dibuat atau diterima.
+                        Belum ada surat.
                     </td>
                 </tr>
             @endforelse
