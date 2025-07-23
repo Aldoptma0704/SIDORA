@@ -4,10 +4,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DisposisiController;
-use App\Http\Controllers\Admin\AdminSuratController;
+//use App\Http\Controllers\Admin\AdminSuratController;
+use App\Http\Controllers\Admin\SuratController as AdminSuratController;
 use App\Http\Controllers\Pegawai\SuratController as PegawaiSuratController;
 use App\Http\Controllers\Pimpinan\SuratController as PimpinanSuratController;
 use App\Http\Controllers\Pegawai\PegawaiDashboardController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Pimpinan\SuratController;
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -45,6 +51,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/disposisi-masuk', [AdminSuratController::class, 'disposisiMasuk'])->name('admin.disposisi.masuk');
     Route::get('/disposisi/{id}/form', [AdminSuratController::class, 'formDisposisi'])->name('admin.surat.disposisi.form');
     Route::post('/disposisi/{id}/kirim', [AdminSuratController::class, 'kirimDisposisi'])->name('admin.surat.disposisi.kirim');
+
+    Route::get('/admin/surat/masuk', [App\Http\Controllers\Admin\SuratController::class, 'suratMasuk'])
+        ->name('admin.surat.masuk')
+        ->middleware(['auth', 'role:admin']);
+    Route::get('/surat-dari-pimpinan', [App\Http\Controllers\Admin\AdminSuratController::class, 'index'])->name('admin.surat.dari-pimpinan');
+    Route::get('/surat-dari-pimpinan/{id}', [App\Http\Controllers\Admin\AdminSuratController::class, 'lihat'])->name('admin.surat.dari-pimpinan.lihat');
+   
 });
 
 // ---------------- Pegawai ----------------
@@ -76,4 +89,26 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function
     Route::post('/surat/{id}/tolak', [PimpinanSuratController::class, 'tolak'])->name('pimpinan.surat.tolak');
     Route::get('/disposisi', [PimpinanSuratController::class, 'disposisi'])->name('pimpinan.disposisi');
     Route::get('/surat/{id}/preview', [PimpinanSuratController::class, 'preview'])->name('pimpinan.surat.preview');
+
+    Route::get('/balasansurat', [PimpinanSuratController::class, 'balasanSurat'])->name('pimpinan.balasansurat');
+    Route::post('/pimpinan/surat/{id}/balas', [SuratController::class, 'kirimBalasan'])->name('pimpinan.surat.balas');
+    Route::get('/surat/{surat}/balas', [SuratController::class, 'buatBalasan'])->name('surat.balas');
+    Route::post('/surat/balas', [SuratController::class, 'simpanBalasan'])->name('surat.balas.store');
+    Route::post('/pimpinan/surat-balasan/simpan', [SuratController::class, 'simpanSuratBalasan'])->name('pimpinan.surat-balasan.simpan');
+    Route::post('/pimpinan/surat/balasan', [SuratController::class, 'simpanSuratBalasan'])->name('pimpinan.surat.balasan.simpan');
+    Route::get('/pimpinan/status-surat', [SuratController::class, 'statusSurat'])->name('pimpinan.status-surat');
+    Route::post('/pimpinan/kirim-surat/{id}', [SuratController::class, 'kirimSurat'])->name('pimpinan.kirim-surat');
+    Route::get('/pimpinan/statussurat', [App\Http\Controllers\Pimpinan\SuratController::class, 'statusSurat'])->name('pimpinan.statussurat');
+    Route::get('/pimpinan/surat/{id}/view', [App\Http\Controllers\Pimpinan\SuratController::class, 'view'])->name('pimpinan.surat.view');
+    
+
+});
+
+
+// ---------------- Profile ----------------
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
 });

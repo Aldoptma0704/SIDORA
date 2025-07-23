@@ -95,12 +95,13 @@
                     ) !!}" alt="QR Code">
                 @endif
             </div>
-            <div class="text-left w-[300px]">
+            <div class="text-right w-[300px]">
                 <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
                 <div class="h-16"></div> {{-- Spacer untuk tanda tangan --}}
                 <p class="font-bold underline">{{ $surat->penandatangan_nama ?? 'Nama Pejabat' }}</p>
                 <p>NIP. {{ $surat->penandatangan_nip ?? '..........' }}</p>
             </div>
+
         </div>
 
     </div>

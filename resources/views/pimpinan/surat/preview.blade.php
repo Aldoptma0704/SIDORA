@@ -52,19 +52,17 @@
 
     <p class="mt-6">Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 
-{{-- Tanda tangan --}}
+ {{-- Tanda tangan --}}
 <div class="mt-10 text-right">
-    <p>Hormat kami,</p>
-
+    
     <div class="flex flex-col items-end mt-4 space-y-2">
-        {{-- ✅ QR Code hanya tampil jika status disetujui DAN sudah ditandatangani --}}
-        @if ($surat->status === 'disetujui' && $surat->signed_at)
-            <div>
-                <img src="data:image/png;base64, {!! base64_encode(
-                    QrCode::format('png')->size(100)->generate(
-                        $surat->penandatangan_nama . ' | ' . \Carbon\Carbon::parse($surat->signed_at)->translatedFormat('d F Y H:i')
-                    )
-                ) !!}" alt="QR Signature" class="inline-block">
+        <div>
+            <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
+        </div>
+        {{-- ✅ Tampilkan tanda tangan jika disetujui dan ada file signature --}}
+        @if ($surat->status === 'disetujui' && $surat->signed_at && $penandatangan && $penandatangan->signature)
+            <div class="mb-2">
+                <img src="{{ asset('storage/signatures/' . $penandatangan->signature) }}" alt="Tanda Tangan" class="h-20">
             </div>
         @else
             <div class="italic text-gray-500">
@@ -72,16 +70,15 @@
             </div>
         @endif
 
+
         {{-- Nama & Jabatan --}}
         <div>
             <p class="font-bold">{{ $surat->penandatangan_nama ?? 'Nama Pejabat' }}</p>
-            <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
+            
             <p>NIP. {{ $surat->penandatangan_nip ?? '..........' }}</p>
         </div>
     </div>
-</div>
-
-
+</div> 
 
 {{-- Tombol Aksi --}}
 <div class="max-w-3xl mx-auto my-6">

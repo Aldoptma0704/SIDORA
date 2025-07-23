@@ -30,6 +30,25 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
         </div>
 
+        {{-- ✅ Tambahan Jabatan --}}
+        <div class="mb-4">
+            <label for="position" class="block text-gray-700 font-medium mb-2">Jabatan</label>
+            <input type="text" name="position" id="position"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500"
+                value="{{ old('position', $user->position) }}">
+        </div>
+
+
+
+        {{-- ✅ Tambahan NIP --}}
+        <div class="mb-4">
+            <label for="nip" class="block text-gray-700 font-medium mb-2">NIP</label>
+            <input type="text" name="nip" id="nip"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500"
+                value="{{ old('nip', $user->nip) }}">
+        </div>
+
+
         <div class="mb-4">
             <label for="role" class="block text-sm font-semibold text-gray-700">Peran</label>
             <select name="role" id="role" required
@@ -49,25 +68,12 @@
                 <option value="Sub Bagian Umum dan Kepegawaian" {{ old('bagian', $user->bagian) == 'Sub Bagian Umum dan Kepegawaian' ? 'selected' : '' }}>Sub Bagian Umum dan Kepegawaian</option>
                 <option value="Substansi Keuangan dan Aset" {{ old('bagian', $user->bagian) == 'Substansi Keuangan dan Aset' ? 'selected' : '' }}>Substansi Keuangan dan Aset</option>
                 <option value="Substansi Perencanaan" {{ old('bagian', $user->bagian) == 'Substansi Perencanaan' ? 'selected' : '' }}>Substansi Perencanaan</option>
-                <optgroup label="Penempatan dan Perluasan Kesempatan Kerja">
-                    <option value="Seksi Penempatan Tenaga Kerja Dalam Negeri" {{ old('bagian', $user->bagian) == 'Seksi Penempatan Tenaga Kerja Dalam Negeri' ? 'selected' : '' }}>Seksi Penempatan Tenaga Kerja Dalam Negeri</option>
-                    <option value="Substansi Penempatan Tenaga Kerja Luar Negeri" {{ old('bagian', $user->bagian) == 'Substansi Penempatan Tenaga Kerja Luar Negeri' ? 'selected' : '' }}>Substansi Penempatan Tenaga Kerja Luar Negeri</option>
-                    <option value="Seksi Pengembangan Informasi Pasar Kerja" {{ old('bagian', $user->bagian) == 'Seksi Pengembangan Informasi Pasar Kerja' ? 'selected' : '' }}>Seksi Pengembangan Informasi Pasar Kerja</option>
-                </optgroup>
-                <optgroup label="Pelatihan dan Produktivitas Tenaga Kerja">
-                    <option value="Substansi Pembinaan, Pelatihan dan Pemagangan Tenaga Kerja" {{ old('bagian', $user->bagian) == 'Substansi Pembinaan, Pelatihan dan Pemagangan Tenaga Kerja' ? 'selected' : '' }}>Substansi Pembinaan, Pelatihan dan Pemagangan Tenaga Kerja</option>
-                    <option value="Seksi Pengembangan Produktivitas Tenaga Kerja" {{ old('bagian', $user->bagian) == 'Seksi Pengembangan Produktivitas Tenaga Kerja' ? 'selected' : '' }}>Seksi Pengembangan Produktivitas Tenaga Kerja</option>
-                    <option value="Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja" {{ old('bagian', $user->bagian) == 'Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja' ? 'selected' : '' }}>Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja</option>
-                </optgroup>
-                <optgroup label="Bidang Pengawasan Ketenagakerjaan">
-                    <option value="Seksi Pengawasan Norma Kerja Jamsostek, Pekerja Perempuan dan Anak, Seksi Penegakan Hukum dan Penindakan" {{ old('bagian', $user->bagian) == 'Seksi Pengawasan Norma Kerja Jamsostek, Pekerja Perempuan dan Anak, Seksi Penegakan Hukum dan Penindakan' ? 'selected' : '' }}>Seksi Pengawasan Norma Kerja Jamsostek, Pekerja Perempuan dan Anak, Seksi Penegakan Hukum dan Penindakan</option>
-                    <option value="Substansi  Pengawasan Norma Keselamatan dan Kesehatan Kerja" {{ old('bagian', $user->bagian) == 'Substansi  Pengawasan Norma Keselamatan dan Kesehatan Kerja' ? 'selected' : '' }}>Substansi  Pengawasan Norma Keselamatan dan Kesehatan Kerja</option>
-                </optgroup>
-                <optgroup label="Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja">
-                    <option value="Seksi Pembinaan Organisasi Pekerja Pengusaha dan Lembaga Hubungan Industrial" {{ old('bagian', $user->bagian) == 'Seksi Pembinaan Organisasi Pekerja Pengusaha dan Lembaga Hubungan Industrial' ? 'selected' : '' }}>Seksi Pembinaan Organisasi Pekerja Pengusaha dan Lembaga Hubungan Industrial</option>
-                    <option value="Seksi Pembinaan Syarat Kerja dan Jamsostek" {{ old('bagian', $user->bagian) == 'Seksi Pembinaan Syarat Kerja dan Jamsostek' ? 'selected' : '' }}>Seksi Pembinaan Syarat Kerja dan Jamsostek</option>
-                    <option value="Substansi Penyelesaian Perselisihan Hubungan Industrial" {{ old('bagian', $user->bagian) == 'Substansi Penyelesaian Perselisihan Hubungan Industrial' ? 'selected' : '' }}>Substansi Penyelesaian Perselisihan Hubungan Industrial</option>
-                </optgroup>
+
+                <option value="Penempatan dan Perluasan Kesempatan Kerja" {{ old('bagian', $user->bagian) == 'Penempatan dan Perluasan Kesempatan Kerja' ? 'selected' : '' }}>Penempatan dan Perluasan Kesempatan Kerja</option>
+                <option value="Pelatihan dan Produktivitas Tenaga Kerja" {{ old('bagian', $user->bagian) == 'Pelatihan dan Produktivitas Tenaga Kerja' ? 'selected' : '' }}>Pelatihan dan Produktivitas Tenaga Kerja</option>
+                <option value="Bidang Pengawasan Ketenagakerjaan" {{ old('bagian', $user->bagian) == 'Bidang Pengawasan Ketenagakerjaan' ? 'selected' : '' }}>Bidang Pengawasan Ketenagakerjaan</option>
+                <option value="Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja" {{ old('bagian', $user->bagian) == 'Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja' ? 'selected' : '' }}>Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja</option>
+
             </select>
         </div>
 

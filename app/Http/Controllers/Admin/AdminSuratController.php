@@ -16,4 +16,17 @@ class AdminSuratController extends Controller
 
         return view('admin.surat.disposisi_masuk', compact('surats'));
     }
+
+    //Tambahan
+    public function index()
+    {
+        $surats = Surat::with('pengirim')->latest()->get();
+        return view('admin.surat.index', compact('surats'));
+    }
+
+    public function lihat($id)
+    {
+        $surat = Surat::with('pengirim')->findOrFail($id);
+        return view('admin.surat.lihat', compact('surat'));
+    }
 }

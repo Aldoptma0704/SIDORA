@@ -38,4 +38,11 @@ class Surat extends Model
     {
         return $this->belongsTo(User::class, 'disposisi_user_id');
     }
+
+    //
+    public function pengirim()
+    {
+        return $this->belongsTo(User::class, 'pengirim_id');
+    }
+
 }

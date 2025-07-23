@@ -61,11 +61,31 @@
 <body class="bg-gray-100 min-h-screen flex flex-col">
     <header class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-2">
-            <img src="https://storage.googleapis.com/a1aa/image/1a26fe5e-e253-49c5-f177-88a240b1b315.jpg" class="w-8 h-8 rounded" alt="Logo">
-            <span class="text-xl font-semibold text-blue-700">SuratDinas</span>
+            <!-- <img src="https://storage.googleapis.com/a1aa/image/1a26fe5e-e253-49c5-f177-88a240b1b315.jpg" class="w-8 h-8 rounded" alt="Logo"> -->
+            <img src="{{ asset('img/logo_lampung.png') }}" class="h-12 w-auto rounded" alt="Logo">
+            <span class="text-xl font-semibold text-blue-700">Surat Dinas (SIDORA)</span>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-gray-800 font-medium">{{ Auth::user()->name }}</span>
+            <!-- <span class="text-gray-800 font-medium">{{ Auth::user()->name }}</span>
+            <a href="{{ route('profile.show') }}" class="flex items-center gap-1 text-gray-700 hover:text-blue-600">
+                <i class="fas fa-user"></i>
+                <span class="hidden sm:inline">Profile</span>
+            </a> -->
+            @if (Auth::user()->profile_photo)
+                <img src="{{ asset('storage/profile_photos/' . Auth::user()->profile_photo) }}" 
+                    alt="Foto Profil" 
+                    class="w-10 h-10 rounded-full object-cover border border-gray-300 shadow-sm">
+            @else
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                    <i class="fas fa-user"></i>
+                </div>
+            @endif
+
+            <div class="text-right">
+                <span class="block text-sm font-medium text-gray-800">{{ Auth::user()->name }}</span>
+                <a href="{{ route('profile.show') }}" class="text-xs text-blue-600 hover:underline">Lihat Profil</a>
+            </div>
+
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="flex items-center gap-1 text-red-600 hover:text-red-800">
@@ -100,6 +120,11 @@
                         <i class="fas fa-paper-plane w-5"></i>
                         <span class="ml-3 font-medium">Disposisi Surat</span>
                     </a>
+                    <a href="{{ route('admin.surat.masuk') }}" class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-700">
+                        <i class="fas fa-inbox w-5"></i>
+                        <span class="ml-3 font-medium">Surat Masuk Pimpinan</span>
+                    </a>
+
                 @elseif (Auth::user()->role === 'pegawai')
                     <a href="{{ route('pegawai.dashboard') }}" class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-700">
                         <i class="fas fa-tachometer-alt w-5"></i>
@@ -137,6 +162,14 @@
                     <a href="/pimpinan/disposisi" class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-700">
                         <i class="fas fa-paper-plane w-5"></i>
                         <span class="ml-3 font-medium">Disposisi Surat</span>
+                    </a>
+                    <a href="{{ route('pimpinan.statussurat') }}" class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-700">
+                        <i class="fas fa-table w-5"></i>
+                        <span class="ml-3 font-medium">Status Surat Balasan</span>
+                    </a>
+                    <a href="/pimpinan/balasansurat" class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-blue-100 hover:text-blue-700">
+                        <i class="fas fa-paper-plane w-5"></i>
+                        <span class="ml-3 font-medium">Surat Balasan</span>
                     </a>
                 @endif
             </nav>
