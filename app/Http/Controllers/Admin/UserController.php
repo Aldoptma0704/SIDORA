@@ -38,6 +38,8 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'role' => 'required|in:admin,pegawai,pimpinan',
             'bagian' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255', 
+            'nip' => 'nullable|string|max:50',      
             'password' => 'required|min:6',
         ]);
 
@@ -46,6 +48,8 @@ class UserController extends Controller
             'email' => $request->email,
             'role' => $request->role,
             'bagian' => $request->bagian,
+            'position' => $request->position, 
+            'nip' => $request->nip,           
             'password' => Hash::make($request->password),
         ]);
 
@@ -66,6 +70,8 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,pegawai,pimpinan',
             'bagian' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255', 
+            'nip' => 'nullable|string|max:50',       
         ]);
 
         $user->update([
@@ -73,6 +79,8 @@ class UserController extends Controller
             'email' => $request->email,
             'role' => $request->role,
             'bagian' => $request->bagian,
+            'position' => $request->position, 
+            'nip' => $request->nip,           
         ]);
 
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil diupdate.');
@@ -90,4 +98,21 @@ class UserController extends Controller
         $surats = Surat::with('user')->latest()->get();
         return view('admin.laporan.index', compact('surats'));
     }
+
+    //surat masuk dari pimpinan
+    // public function suratMasuk()
+    // {
+    //     $surats = \App\Models\Surat::where('status_balasan', 'dikirim')
+    //                 ->latest()
+    //                 ->get();
+
+    //     return view('admin.surat.masuk', compact('surats'));
+    // }
+
+    // public function lihat($id)
+    // {
+    //     $surat = \App\Models\Surat::findOrFail($id);
+    //     return view('admin.surat.lihat', compact('surat'));
+    // }
+
 }

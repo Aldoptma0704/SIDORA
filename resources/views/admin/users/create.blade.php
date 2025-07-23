@@ -29,6 +29,20 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
         </div>
 
+        {{-- ✅ Tambahan Jabatan --}}
+        <div class="mb-4">
+            <label for="position" class="block text-sm font-semibold text-gray-700">Jabatan</label>
+            <input type="text" name="position" id="position" value="{{ old('position') }}"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+        </div>
+
+        {{-- ✅ Tambahan NIP --}}
+        <div class="mb-4">
+            <label for="nip" class="block text-sm font-semibold text-gray-700">NIP</label>
+            <input type="text" name="nip" id="nip" value="{{ old('nip') }}"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+        </div>
+
         <div class="mb-4">
             <label for="role" class="block text-sm font-semibold text-gray-700">Peran (Role)</label>
             <select name="role" id="role" required
@@ -45,28 +59,15 @@
             <select name="bagian" id="bagian"
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
                 <option value="">-- Pilih Bagian --</option>
+                {{-- Pilihan bagian tetap sama --}}
                 <option value="Sub Bagian Umum dan Kepegawaian">Sub Bagian Umum dan Kepegawaian</option>
                 <option value="Substansi Keuangan dan Aset">Substansi Keuangan dan Aset</option>
                 <option value="Substansi Perencanaan">Substansi Perencanaan</option>
-                <optgroup label="Penempatan dan Perluasan Kesempatan Kerja">
-                    <option value="Seksi Penempatan Tenaga Kerja Dalam Negeri">Seksi Penempatan Tenaga Kerja Dalam Negeri</option>
-                    <option value="Substansi Penempatan Tenaga Kerja Luar Negeri">Substansi Penempatan Tenaga Kerja Luar Negeri</option>
-                    <option value="Seksi Pengembangan Informasi Pasar Kerja">Seksi Pengembangan Informasi Pasar Kerja</option>
-                </optgroup>
-                <optgroup label="Pelatihan dan Produktivitas Tenaga Kerja">
-                    <option value="Substansi Pembinaan, Pelatihan dan Pemagangan Tenaga Kerja">Substansi Pembinaan, Pelatihan dan Pemagangan Tenaga Kerja</option>
-                    <option value="Seksi Pengembangan Produktivitas Tenaga Kerja">Seksi Pengembangan Produktivitas Tenaga Kerja</option>
-                    <option value="Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja">Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja</option>
-                </optgroup>
-                <optgroup label="Bidang Pengawasan Ketenagakerjaan">
-                    <option value="Seksi Pengawasan Norma Kerja Jamsostek, Pekerja Perempuan dan Anak, Seksi Penegakan Hukum dan Penindakan">Seksi Pengawasan Norma Kerja Jamsostek, Pekerja Perempuan dan Anak, Seksi Penegakan Hukum dan Penindakan</option>
-                    <option value="Substansi  Pengawasan Norma Keselamatan dan Kesehatan Kerja">Substansi  Pengawasan Norma Keselamatan dan Kesehatan Kerja</option>
-                </optgroup>
-                <optgroup label="Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja">
-                    <option value="Seksi Pembinaan Organisasi Pekerja Pengusaha dan Lembaga Hubungan Industrial">Seksi Pembinaan Organisasi Pekerja Pengusaha dan Lembaga Hubungan Industrial</option>
-                    <option value="Seksi Pembinaan Syarat Kerja dan Jamsostek">Seksi Pembinaan Syarat Kerja dan Jamsostek</option>
-                    <option value="Substansi Penyelesaian Perselisihan Hubungan Industrial">Substansi Penyelesaian Perselisihan Hubungan Industrial</option>
-                </optgroup>
+
+                <option value="Penempatan dan Perluasan Kesempatan Kerja">Penempatan dan Perluasan Kesempatan Kerja</option>
+                <option value="Pelatihan dan Produktivitas Tenaga Kerja">Pelatihan dan Produktivitas Tenaga Kerja</option>
+                <option value="Bidang Pengawasan Ketenagakerjaan">Bidang Pengawasan Ketenagakerjaan</option>
+                <option value="Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja">Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja</option>
             </select>
         </div>
 
