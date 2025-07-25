@@ -9,16 +9,22 @@ return new class extends Migration
     public function up()
     {
         Schema::table('surats', function (Blueprint $table) {
-            $table->unsignedBigInteger('pengirim_id')->nullable()->after('isi');
-            // $table->unsignedBigInteger('user_id')->nullable()->after('pengirim_id'); // Sudah ada
+            if (!Schema::hasColumn('surats', 'pengirim_id')) {
+                $table->unsignedBigInteger('pengirim_id')->nullable()->after('isi');
+            }
         });
     }
 
     public function down()
     {
         Schema::table('surats', function (Blueprint $table) {
-            $table->dropColumn(['pengirim_id', 'user_id']);
+            if (Schema::hasColumn('surats', 'pengirim_id')) {
+                $table->dropColumn('pengirim_id');
+            }
+
+            if (Schema::hasColumn('surats', 'user_id')) {
+                $table->dropColumn('user_id');
+            }
         });
     }
-
 };

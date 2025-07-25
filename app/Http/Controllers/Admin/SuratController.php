@@ -19,4 +19,12 @@ class SuratController extends Controller
         $surat = Surat::findOrFail($id);
         return view('admin.surat.lihat', compact('surat'));
     }
+
+    public function disposisiMasuk()
+    {
+        // Ambil semua surat yang punya relasi ke disposisi
+        $surats = Surat::whereHas('disposisi')->latest()->get();
+
+        return view('admin.surat.disposisi_masuk', compact('surats'));
+    }
 }

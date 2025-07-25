@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Surat;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class authcontroller extends Controller
 {
@@ -31,5 +32,30 @@ class authcontroller extends Controller
     {
         Auth::logout();
         return redirect('/');
+    }
+
+    public function showResetPasswordForm()
+    {
+        return view('auth.reset-password');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+            'old_password' => ['required'],
+            'new_password' => ['required', 'confirmed', 'min:6'],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->old_password, $user->password)) {
+            return back()->withErrors(['old_password' => 'Username atau password lama salah']);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return redirect()->route('login')->with('success', 'Password berhasil diganti. Silakan login.');
     }
 }

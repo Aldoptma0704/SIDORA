@@ -57,7 +57,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         ->middleware(['auth', 'role:admin']);
     Route::get('/surat-dari-pimpinan', [App\Http\Controllers\Admin\AdminSuratController::class, 'index'])->name('admin.surat.dari-pimpinan');
     Route::get('/surat-dari-pimpinan/{id}', [App\Http\Controllers\Admin\AdminSuratController::class, 'lihat'])->name('admin.surat.dari-pimpinan.lihat');
-   
 });
 
 // ---------------- Pegawai ----------------
@@ -89,6 +88,8 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function
     Route::post('/surat/{id}/tolak', [PimpinanSuratController::class, 'tolak'])->name('pimpinan.surat.tolak');
     Route::get('/disposisi', [PimpinanSuratController::class, 'disposisi'])->name('pimpinan.disposisi');
     Route::get('/surat/{id}/preview', [PimpinanSuratController::class, 'preview'])->name('pimpinan.surat.preview');
+    Route::delete('/pimpinan/surat/{id}', [SuratController::class, 'destroy'])->name('pimpinan.surat.destroy');
+
 
     Route::get('/balasansurat', [PimpinanSuratController::class, 'balasanSurat'])->name('pimpinan.balasansurat');
     Route::post('/pimpinan/surat/{id}/balas', [SuratController::class, 'kirimBalasan'])->name('pimpinan.surat.balas');
@@ -100,8 +101,6 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function
     Route::post('/pimpinan/kirim-surat/{id}', [SuratController::class, 'kirimSurat'])->name('pimpinan.kirim-surat');
     Route::get('/pimpinan/statussurat', [App\Http\Controllers\Pimpinan\SuratController::class, 'statusSurat'])->name('pimpinan.statussurat');
     Route::get('/pimpinan/surat/{id}/view', [App\Http\Controllers\Pimpinan\SuratController::class, 'view'])->name('pimpinan.surat.view');
-    
-
 });
 
 
@@ -110,5 +109,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
 });
+Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset.password.form');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset.password');
