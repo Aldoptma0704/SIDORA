@@ -44,5 +44,8 @@ class Surat extends Model
     {
         return $this->belongsTo(User::class, 'pengirim_id');
     }
-
+    public function disposisi()
+    {
+        return $this->hasOne(\App\Models\Disposisi::class);
+    }
 }

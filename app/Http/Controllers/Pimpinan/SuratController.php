@@ -144,7 +144,7 @@ class SuratController extends Controller
         $surat->isi = $request->isi;
         $surat->pengirim_id = Auth::id();
         $surat->user_id = Auth::id();
-        $surat->jenis = $request->jenis ?? 'keluar'; 
+        $surat->jenis = $request->jenis ?? 'keluar';
         $surat->is_balasan = true;
         $surat->status_balasan = 'draft';
         $surat->surat_asal_id = $request->surat_asal_id;
@@ -157,12 +157,11 @@ class SuratController extends Controller
     {
         // Ambil semua surat yang statusnya masih draft (misal status = 'draft' atau null)
         $drafts = Surat::where('status', 'draft')
-                        ->where('pengirim_id', Auth::id())
-                        ->get();
+            ->where('pengirim_id', Auth::id())
+            ->get();
 
         // return view('pimpinan.status-surat', compact('drafts'));
         return view('pimpinan.surat.status_surat', compact('drafts'));
-
     }
 
     public function kirimSurat($id)
@@ -181,7 +180,7 @@ class SuratController extends Controller
 
         return redirect()->back()->with('success', 'Surat berhasil dikirim ke Admin.');
     }
-    
+
     public function view($id)
     {
         $surat = Surat::findOrFail($id);
@@ -195,16 +194,26 @@ class SuratController extends Controller
         $drafts = Surat::where('status_balasan', 'draft')->get();
         return view('pimpinan.surat.status_surat', compact('drafts'));
     }
-    
+
     public function showDraftSurat()
     {
         // Ambil hanya surat dengan status_balasan 'draft'
         $drafts = Surat::where('status_balasan', 'draft')
-                        ->where('pengirim_id', Auth::id())
-                        ->get();
+            ->where('pengirim_id', Auth::id())
+            ->get();
 
         return view('pimpinan.surat.status_surat', compact('drafts'));
     }
 
+    public function destroy($id)
+    {
+        $surat = Surat::findOrFail($id);
 
+        if ($surat->status_balasan !== 'draft') {
+            return redirect()->back()->with('error', 'Surat hanya bisa dihapus jika masih berstatus draft.');
+        }
+
+        $surat->delete();
+        return redirect()->back()->with('success', 'Surat berhasil dihapus.');
+    }
 }

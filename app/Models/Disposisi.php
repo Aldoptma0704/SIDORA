@@ -9,6 +9,9 @@ class Disposisi extends Model
 {
     use HasFactory;
 
+    protected $table = 'disposis'; // 👈 Wajib untuk menghindari error
+    protected $fillable = ['surat_id', 'pimpinan_id', 'catatan'];
+
     public function surat()
     {
         return $this->belongsTo(Surat::class);

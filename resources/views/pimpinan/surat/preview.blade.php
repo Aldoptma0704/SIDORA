@@ -30,7 +30,7 @@
             </p>
         </div>
     </div>
-    <hr style="border-top: 3px solid black;" class="my-4">
+    <hr class="border-t-4 border-black my-4">
 
     {{-- Tanggal --}}
     <p class="text-right mb-4">Bandar Lampung, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
@@ -100,6 +100,7 @@
                 </a>
             </div>
         </div>
+        
     @endif
 </div>
 @endsection
