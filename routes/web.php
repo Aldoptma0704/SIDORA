@@ -57,6 +57,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         ->middleware(['auth', 'role:admin']);
     Route::get('/surat-dari-pimpinan', [App\Http\Controllers\Admin\AdminSuratController::class, 'index'])->name('admin.surat.dari-pimpinan');
     Route::get('/surat-dari-pimpinan/{id}', [App\Http\Controllers\Admin\AdminSuratController::class, 'lihat'])->name('admin.surat.dari-pimpinan.lihat');
+
+    // routes/web.php
+
+    // Ensure this is within your admin middleware group, e.g.:
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        // ... other admin routes ...
+
+        // Route for Admin to download a letter PDF
+        Route::get('/surat/{surat}/download', [App\Http\Controllers\Admin\SuratController::class, 'download'])->name('surat.download');
+
+        // ... other admin routes ...
+    });
 });
 
 // ---------------- Pegawai ----------------
@@ -101,6 +113,22 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->group(function
     Route::post('/pimpinan/kirim-surat/{id}', [SuratController::class, 'kirimSurat'])->name('pimpinan.kirim-surat');
     Route::get('/pimpinan/statussurat', [App\Http\Controllers\Pimpinan\SuratController::class, 'statusSurat'])->name('pimpinan.statussurat');
     Route::get('/pimpinan/surat/{id}/view', [App\Http\Controllers\Pimpinan\SuratController::class, 'view'])->name('pimpinan.surat.view');
+
+    // Inside your routes/web.php file, within the appropriate group (e.g., 'pimpinan' middleware group)
+
+    // Route for displaying the edit form
+    Route::get('/pimpinan/surat/{surat}/edit', [App\Http\Controllers\Pimpinan\SuratController::class, 'edit'])->name('pimpinan.surat.edit');
+
+    // Route for handling the update submission
+    Route::put('/pimpinan/surat/{surat}', [App\Http\Controllers\Pimpinan\SuratController::class, 'update'])->name('pimpinan.surat.update');
+    // routes/web.php
+    Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
+        // ... rute pimpinan lainnya ...
+
+        // Rute baru untuk mengunduh surat oleh pimpinan
+        Route::get('/surat/{surat}/download', [App\Http\Controllers\Pimpinan\SuratController::class, 'download'])->name('surat.download');
+    });
+
 });
 
 

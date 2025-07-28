@@ -94,7 +94,7 @@
                 ✅ Selesai & Kembali
             </a>
             <div class="flex space-x-2">
-                <a href="{{ route('surat.download', $surat->id) }}" 
+                <a href="{{ route('pimpinan.surat.download', $surat->id) }}" 
                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
                     📄 Download PDF
                 </a>

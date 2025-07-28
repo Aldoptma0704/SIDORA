@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE surats CHANGE status status ENUM('draft', 'menunggu', 'disetujui', 'ditolak') NOT NULL DEFAULT 'draft'");
+        DB::statement("ALTER TABLE surats CHANGE status status ENUM('draft_pimpinan','draft', 'menunggu', 'disetujui', 'ditolak','dikirim') NOT NULL DEFAULT 'draft'");
     }
 
     /**
