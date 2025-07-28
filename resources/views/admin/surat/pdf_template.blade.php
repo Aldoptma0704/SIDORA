@@ -1,17 +1,8 @@
-@php
-    use Illuminate\Support\Facades\Auth;
-    $user = Auth::user();
-@endphp
-
-@if (isset($is_pdf) && $is_pdf)
-{{-- ================================================================= --}}
-{{-- PDF Rendering Section (No layout extension, pure HTML/CSS for DomPDF) --}}
-{{-- ================================================================= --}}
 <!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Surat Balasan - {{ $surat->judul }}</title>
+    <title>Surat Admin - {{ $surat->judul }}</title>
     <style>
         /* CSS khusus untuk DomPDF */
         @page {
@@ -30,7 +21,7 @@
         td {
             vertical-align: top;
         }
-        .header-section, .info-section, .signature-section {
+        .header-section, .info-section, .content-section, .signature-section, .qr-section {
             page-break-inside: avoid; /* Hindari pemisahan halaman di dalam bagian ini */
         }
         .header-logo-container {
@@ -90,6 +81,12 @@
         .ql-editor ol, .ql-editor ul {
             margin-left: 1.5em;
             margin-bottom: 1em;
+        }
+        .qr-code {
+            display: block;
+            margin-top: 10px;
+            margin-left: auto; /* Untuk rata kanan */
+            margin-right: 0;
         }
     </style>
 </head>
@@ -169,137 +166,30 @@
 
     <div class="signature-section">
         <div class="signature-block">
-            <p>{{ $user->position ?? 'Jabatan' }}</p>
+            {{-- Menggunakan penandatangan (pengirim surat) untuk jabatan --}}
+            <p>{{ $penandatangan->position ?? 'Jabatan' }}</p>
             <div style="margin-top: 16px;">
-                @if ($user && $user->signature)
+                {{-- Logika untuk menampilkan tanda tangan hanya jika status disetujui/dikirim/draft_pimpinan DAN signed_at ada DAN base64Signature ada --}}
+                @if (in_array($surat->status, ['disetujui', 'dikirim', 'draft_pimpinan']) )
                     <div style="margin-bottom: 8px;">
-                        {{-- Gunakan base64Signature untuk rendering PDF --}}
                         <img src="data:image/png;base64,{{ $base64Signature }}" alt="Tanda Tangan" class="signature-image">
                     </div>
                 @else
-                    <div style="font-style: italic; color: #6b7280;">Belum ada tanda tangan diunggah</div>
+                    <div style="font-style: italic; color: #6b7280;">Belum ditandatangani</div>
                 @endif
                 <div>
-                    <p style="font-weight: bold;">{{ $user->name ?? 'Nama Pejabat' }}</p>
-                    <p>NIP. {{ $user->nip ?? '..........' }}</p>
+                    {{-- Menggunakan penandatangan (pengirim surat) untuk nama dan NIP --}}
+                    <p style="font-weight: bold;">{{ $penandatangan->name ?? 'Nama Pejabat' }}</p>
+                    <p>NIP. {{ $penandatangan->nip ?? '..........' }}</p>
                 </div>
             </div>
         </div>
     </div>
+    {{-- QR Code Section for PDF --}}
+    <div class="qr-section" style="text-align: right; margin-top: 20px; page-break-inside: avoid;">
+        @if ($surat->status === 'disetujui')
+            {!! QrCode::size(80)->generate(route('surat.show_public', $surat->id)) !!}
+        @endif
+    </div>
 </body>
 </html>
-
-@else
-{{-- ================================================================= --}}
-{{-- Web Display Section (Uses layouts.app and Tailwind CSS) --}}
-{{-- ================================================================= --}}
-@extends('layouts.app')
-
-@section('content')
-<div class="bg-white p-8 max-w-3xl mx-auto text-sm text-black leading-relaxed">
-
-    {{-- Notifikasi Sukses --}}
-    @if (session('success'))
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
-            <p class="font-bold">Berhasil</p>
-            <p>{{ session('success') }}</p>
-        </div>
-    @endif
-
-    {{-- Header Logo & Informasi Dinas --}}
-    <div class="flex items-center justify-center mb-4">
-        <div class="shrink-0">
-            <img src="{{ asset('img/logo_lampung.png') }}" alt="Logo" style="height: 90px;">
-        </div>
-        <div class="ml-6 text-center">
-            <h1 class="text-lg font-bold uppercase">PEMERINTAH PROVINSI LAMPUNG</h1>
-            <h2 class="text-md font-semibold uppercase">DINAS TENAGA KERJA</h2>
-            <p class="text-sm">
-                Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
-                Laman: <a href="https://disnaker.lampungprov.go.id" class="text-blue-600 underline" target="_blank">https://disnaker.lampungprov.go.id</a> |
-                Pos-el: <a href="mailto:lampungnaker@gmail.com" class="text-blue-600 underline">lampungnaker@gmail.com</a>
-            </p>
-        </div>
-    </div>
-    <hr style="border-top: 3px solid black;" class="my-4">
-    
-    @if ($surat->jenis === 'keluar_full')
-        <div class="flex items-center justify-center mb-4">
-            @if ($surat->logo_instansi)
-                <img src="{{ asset('storage/logo/' . $surat->logo_instansi) }}" alt="Logo Instansi" style="height: 90px;">
-            @endif
-            <div class="ml-6 text-center">
-                <h1 class="text-lg font-bold uppercase">{!! $surat->nama_instansi !!}</h1>
-                <p class="text-sm">{!! $surat->kontak_instansi !!}</p>
-                <p class="text-sm">{!! $surat->alamat_instansi !!}</p>
-            </div>
-        </div>
-        <hr style="border-top: 3px solid black;" class="my-4">
-    @endif
-
-    {{-- Tanggal Surat --}}
-    <p class="text-right mb-4">Bandar Lampung, {{ \Carbon\Carbon::parse($surat->created_at)->translatedFormat('d F Y') }}</p>
-
-    {{-- Info Surat --}}
-    <table class="mb-4">
-        <tr><td style="width: 100px;">Nomor</td><td>: {{ $surat->nomor_surat ?? '-' }}</td></tr>
-        <tr><td>Sifat</td><td>: {{ $surat->sifat ?? '-' }}</td></tr>
-        <tr><td>Lampiran</td><td>: {{ $surat->lampiran ?? '-' }}</td></tr>
-        <tr><td>Hal</td><td>: {{ $surat->judul }}</td></tr>
-    </table>
-
-    <p>Kepada Yth.</p>
-    <p class="mb-2">{{ $surat->tujuan ?? '........................................' }}</p>
-    <p class="mb-4">di Tempat</p>
-
-    <p class="mb-4">Dengan hormat,</p>
-    <div class="ql-editor p-0">{!! $surat->isi !!}</div>
-
-    <p class="mt-6">Demikian surat ini kami sampaikan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
-
-{{-- Tanda Tangan --}}
-<div class="mt-10 text-right">
-    <div>
-        <p>{{ $user->position ?? 'Jabatan' }}</p>
-    </div>
-
-    <div class="flex flex-col items-end mt-4 space-y-2">
-        @if ($user && $user->signature)
-            <div>
-                <img src="{{ asset('storage/signatures/' . $user->signature) }}" alt="Tanda Tangan" class="h-20">
-            </div>
-        @else
-            <div class="italic text-gray-500">Belum ada tanda tangan diunggah</div>
-        @endif
-
-        <div>
-            <p class="font-bold">{{ $user->name ?? 'Nama Pejabat' }}</p>
-            <p>NIP. {{ $user->nip ?? '..........' }}</p>
-        </div>
-    </div>
-</div>
-
-
-    {{-- Tombol Aksi --}}
-    <div class="max-w-3xl mx-auto my-6">
-        <div class="flex justify-between items-center">
-            <a href="{{ route('pimpinan.statussurat') }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow">
-                Kembali
-            </a>
-            <div class="flex space-x-2">
-                {{-- Tombol Edit (Hanya tampil jika status draft atau draft_pimpinan) --}}
-                @if (in_array($surat->status, ['draft', 'draft_pimpinan']))
-                    <a href="{{ route('pimpinan.surat.edit', $surat->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 shadow">
-                        ✏️ Edit Surat
-                    </a>
-                @endif
-                {{-- Tombol Download PDF (Mengarah ke rute khusus pimpinan) --}}
-                <a href="{{ route('pimpinan.surat.download', $surat->id) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
-                    📄 Download PDF
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
-@endif

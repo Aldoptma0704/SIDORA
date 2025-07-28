@@ -131,7 +131,7 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            @php
+                                            <!-- @php
                                                 $status = $surat->status_balasan ?? 'draft';
                                                 $statusColors = [
                                                     'draft' => 'bg-yellow-100 text-yellow-800',
@@ -141,6 +141,32 @@
                                                 ];
                                                 $statusIcons = [
                                                     'draft' => 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z',
+                                                    'pending' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                    'approved' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                    'rejected' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                ];
+                                            @endphp -->
+                                            @php
+                                                // Pastikan variabel status mengambil dari $surat->status, bukan $surat->status_balasan
+                                                $status = $surat->status ?? 'draft'; // Gunakan 'status'
+
+                                                // Jika status adalah 'draft_pimpinan', ubah menjadi 'draft' untuk tampilan
+                                                if ($status === 'draft_pimpinan') {
+                                                    $status = 'draft';
+                                                }
+
+                                                $statusColors = [
+                                                    'draft' => 'bg-yellow-100 text-yellow-800',
+                                                    'draft_pimpinan' => 'bg-purple-100 text-purple-800', // Ini tidak akan digunakan jika status diubah ke 'draft'
+                                                    'dikirim' => 'bg-indigo-100 text-indigo-800',
+                                                    'pending' => 'bg-blue-100 text-blue-800',
+                                                    'approved' => 'bg-green-100 text-green-800',
+                                                    'rejected' => 'bg-red-100 text-red-800',
+                                                ];
+                                                $statusIcons = [
+                                                    'draft' => 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z',
+                                                    'draft_pimpinan' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', // Ini tidak akan digunakan jika status diubah ke 'draft'
+                                                    'dikirim' => 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
                                                     'pending' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
                                                     'approved' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                                                     'rejected' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
