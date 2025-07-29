@@ -57,7 +57,7 @@
                     <div class="absolute inset-0 bg-gradient-to-br from-yellow-50 to-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative z-10">
                         <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl mb-4 group-hover:from-yellow-200 group-hover:to-orange-200 transition-colors duration-300">
-                            <i class="fas fa-hourglass-half text-yellow-600 text-3xl group-hover:animate-pulse"></i>
+                            <i class="fas fa-hourglass-half group-hover:rotate-12 text-yellow-600 text-3xl group-hover:animate-pulse transition-transform duration-200"></i>
                         </div>
                         <div class="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">Menunggu Persetujuan</div>
                         <div class="text-4xl font-bold text-gray-800 mb-2">{{ $countMenunggu }}</div>
@@ -73,7 +73,7 @@
                     <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative z-10">
                         <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl mb-4 group-hover:from-green-200 group-hover:to-emerald-200 transition-colors duration-300">
-                            <i class="fas fa-check-circle text-green-600 text-3xl group-hover:scale-110 transition-transform duration-200"></i>
+                            <i class="fas fa-check-circle text-green-600 text-3xl group-hover:scale-110 group-hover:rotate-12 transition-transform duration-200"></i>
                         </div>
                         <div class="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">Disetujui</div>
                         <div class="text-4xl font-bold text-gray-800 mb-2">{{ $countDisetujui }}</div>

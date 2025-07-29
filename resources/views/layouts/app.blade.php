@@ -142,44 +142,44 @@
                 @if (Auth::user()->role === 'admin')
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Menu Admin</h3>
                     
-                    <a href="/admin/dashboard" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-tachometer-alt text-primary-600"></i>
+                    <a href="/admin/dashboard" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->is('admin/dashboard') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->is('admin/dashboard') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-tachometer-alt {{ request()->routeIs('admin.dashboard') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Dashboard Admin</span>
                     </a>
 
-                    <a href="{{ route('users.index') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-users-cog text-gray-600"></i>
+                    <a href="{{ route('users.index') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('users.index') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('users.index') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-users-cog {{ request()->routeIs('users.index') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Kelola Pengguna</span>
                     </a>
 
-                    <a href="{{ route('admin.laporan') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-chart-bar text-gray-600"></i>
+                    <a href="{{ route('admin.laporan') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('admin.laporan') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('admin.laporan') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-chart-bar {{ request()->routeIs('admin.laporan') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Laporan Surat</span>
                     </a>
 
-                    <a href="{{ route('admin.disposisi.masuk') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-inbox text-gray-600"></i>
+                    <a href="{{ route('admin.disposisi.masuk') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('admin.disposisi.masuk') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('admin.disposisi.masuk') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-inbox {{ request()->routeIs('admin.disposisi.masuk') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Disposisi Masuk</span>
                     </a>
 
-                    <a href="{{ route('admin.disposisi.form') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-paper-plane text-gray-600"></i>
+                    <a href="{{ route('admin.disposisi.form') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('admin.disposisi.form') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('admin.disposisi.form') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-paper-plane {{ request()->routeIs('admin.disposisi.form') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Disposisi Surat</span>
                     </a>
 
-                    <a href="{{ route('admin.surat.masuk') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-inbox text-gray-600"></i>
+                    <a href="{{ route('admin.surat.masuk') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('admin.surat.masuk') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('admin.surat.masuk') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-inbox {{ request()->routeIs('admin.surat.masuk') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Surat Masuk Pimpinan</span>
                     </a>
@@ -187,18 +187,18 @@
                 @elseif (Auth::user()->role === 'pegawai')
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Menu Pegawai</h3>
                     
-                    <a href="{{ route('pegawai.dashboard') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-tachometer-alt text-primary-600"></i>
+                    <a href="{{ route('pegawai.dashboard') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('pegawai.dashboard') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('pegawai.dashboard') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-tachometer-alt {{ request()->routeIs('pegawai.dashboard') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Dashboard</span>
                     </a>
 
-                    <div x-data="{ open: false }" class="space-y-1">
-                        <button @click="open = !open" class="sidebar-link flex items-center justify-between w-full px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
+                    <div x-data="{ open: {{ request()->routeIs('surat.index') || request()->routeIs('surat.create') || request()->routeIs('surat.edit') || request()->routeIs('surat.show') ? 'true' : 'false' }} }" class="space-y-1">
+                        <button @click="open = !open" class="sidebar-link flex items-center justify-between w-full px-4 py-3 rounded-xl {{ (request()->routeIs('surat.index') || request()->routeIs('surat.create') || request()->routeIs('surat.edit') || request()->routeIs('surat.show')) ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                                    <i class="fas fa-envelope-open-text text-gray-600"></i>
+                                <div class="w-10 h-10 {{ (request()->routeIs('surat.index') || request()->routeIs('surat.create') || request()->routeIs('surat.edit') || request()->routeIs('surat.show')) ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-envelope-open-text {{ (request()->routeIs('surat.index') || request()->routeIs('surat.create') || request()->routeIs('surat.edit') || request()->routeIs('surat.show')) ? 'text-primary-600' : 'text-gray-600' }}"></i>
                                 </div>
                                 <span class="font-medium">Daftar Surat</span>
                             </div>
@@ -220,9 +220,9 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('surat.status_surat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-info-circle text-gray-600"></i>
+                    <a href="{{ route('surat.status_surat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('surat.status_surat') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('surat.status_surat') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-info-circle {{ request()->routeIs('surat.status_surat') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Status Surat</span>
                     </a>
@@ -230,30 +230,30 @@
                 @elseif (Auth::user()->role === 'pimpinan')
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Menu Pimpinan</h3>
                     
-                    <a href="/pimpinan/dashboard" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-tachometer-alt text-primary-600"></i>
+                    <a href="/pimpinan/dashboard" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->is('pimpinan/dashboard') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->is('pimpinan/dashboard') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-tachometer-alt {{ request()->is('pimpinan/dashboard') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Dashboard</span>
                     </a>
 
-                    <a href="/pimpinan/disposisi" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-paper-plane text-gray-600"></i>
+                    <a href="/pimpinan/disposisi" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->is('pimpinan/disposisi*') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->is('pimpinan/disposisi*') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-paper-plane {{ request()->is('pimpinan/disposisi*') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Disposisi Surat</span>
                     </a>
 
-                    <a href="{{ route('pimpinan.statussurat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-table text-gray-600"></i>
+                    <a href="{{ route('pimpinan.statussurat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('pimpinan.statussurat') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->routeIs('pimpinan.statussurat') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-table {{ request()->routeIs('pimpinan.statussurat') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Status Surat Balasan</span>
                     </a>
 
-                    <a href="/pimpinan/balasansurat" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
-                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-paper-plane text-gray-600"></i>
+                    <a href="/pimpinan/balasansurat" class="sidebar-link flex items-center px-4 py-3 rounded-xl {{ request()->is('pimpinan/balasansurat*') ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700' }}">
+                        <div class="w-10 h-10 {{ request()->is('pimpinan/balasansurat*') ? 'bg-primary-200' : 'bg-gray-100' }} rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-paper-plane {{ request()->is('pimpinan/balasansurat*') ? 'text-primary-600' : 'text-gray-600' }}"></i>
                         </div>
                         <span class="font-medium">Surat Balasan</span>
                     </a>

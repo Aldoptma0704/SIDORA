@@ -8,7 +8,7 @@
     selectedItems: [],
     selectAll: false,
     showDeleteConfirm: false
-}" class="space-y-6">
+}" class="space-y-6 ml-6 mt-10">
 
     {{-- Success Notification --}}
     @if (session('success'))
