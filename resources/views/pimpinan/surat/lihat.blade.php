@@ -112,7 +112,6 @@
                 </td>
             </tr>
         </table>
-        <hr class="hr-line">
     </div>
     
     @if ($surat->jenis === 'keluar_full')
@@ -131,7 +130,6 @@
                     </td>
                 </tr>
             </table>
-            <hr class="hr-line">
         </div>
     @endif
 
@@ -207,21 +205,22 @@
     @endif
 
     {{-- Header Logo & Informasi Dinas --}}
-    <div class="flex items-center justify-center mb-4">
-        <div class="shrink-0">
-            <img src="{{ asset('img/logo_lampung.png') }}" alt="Logo" style="height: 90px;">
+    @if ($surat->jenis !== 'keluar_full')
+        <div class="flex items-center justify-center mb-4">
+            <div class="shrink-0">
+                <img src="{{ asset('img/logo_lampung.png') }}" alt="Logo" style="height: 90px;">
+            </div>
+            <div class="ml-6 text-center">
+                <h1 class="text-lg font-bold uppercase">PEMERINTAH PROVINSI LAMPUNG</h1>
+                <h2 class="text-md font-semibold uppercase">DINAS TENAGA KERJA</h2>
+                <p class="text-sm">
+                    Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
+                    Laman: <a href="https://disnaker.lampungprov.go.id" class="text-blue-600 underline" target="_blank">https://disnaker.lampungprov.go.id</a> |
+                    Pos-el: <a href="mailto:lampungnaker@gmail.com" class="text-blue-600 underline">lampungnaker@gmail.com</a>
+                </p>
+            </div>
         </div>
-        <div class="ml-6 text-center">
-            <h1 class="text-lg font-bold uppercase">PEMERINTAH PROVINSI LAMPUNG</h1>
-            <h2 class="text-md font-semibold uppercase">DINAS TENAGA KERJA</h2>
-            <p class="text-sm">
-                Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
-                Laman: <a href="https://disnaker.lampungprov.go.id" class="text-blue-600 underline" target="_blank">https://disnaker.lampungprov.go.id</a> |
-                Pos-el: <a href="mailto:lampungnaker@gmail.com" class="text-blue-600 underline">lampungnaker@gmail.com</a>
-            </p>
-        </div>
-    </div>
-    <hr style="border-top: 3px solid black;" class="my-4">
+    @endif
     
     @if ($surat->jenis === 'keluar_full')
         <div class="flex items-center justify-center mb-4">
@@ -234,8 +233,8 @@
                 <p class="text-sm">{!! $surat->alamat_instansi !!}</p>
             </div>
         </div>
-        <hr style="border-top: 3px solid black;" class="my-4">
     @endif
+    <hr style="border-top: 3px solid black;" class="my-4">
 
     {{-- Tanggal Surat --}}
     <p class="text-right mb-4">Bandar Lampung, {{ \Carbon\Carbon::parse($surat->created_at)->translatedFormat('d F Y') }}</p>
@@ -258,23 +257,25 @@
     <p class="mt-6">Demikian surat ini kami sampaikan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 
 {{-- Tanda Tangan --}}
-<div class="mt-10 text-right">
-    <div>
-        <p>{{ $user->position ?? 'Jabatan' }}</p>
-    </div>
-
-    <div class="flex flex-col items-end mt-4 space-y-2">
-        @if ($user && $user->signature)
-            <div>
-                <img src="{{ asset('storage/signatures/' . $user->signature) }}" alt="Tanda Tangan" class="h-20">
-            </div>
-        @else
-            <div class="italic text-gray-500">Belum ada tanda tangan diunggah</div>
-        @endif
-
+<div class="mt-10 flex justify-end"> {{-- ADDED: flex justify-end to align the whole signature block to the right --}}
+    <div class="flex flex-col items-start space-y-2"> {{-- CHANGED: items-end to items-start to left-align content within the block --}}
         <div>
-            <p class="font-bold">{{ $user->name ?? 'Nama Pejabat' }}</p>
-            <p>NIP. {{ $user->nip ?? '..........' }}</p>
+            <p>{{ $user->position ?? 'Jabatan' }}</p>
+        </div>
+
+        <div class="mt-4">
+            @if ($user && $user->signature)
+                <div>
+                    <img src="{{ asset('storage/signatures/' . $user->signature) }}" alt="Tanda Tangan" class="h-20">
+                </div>
+            @else
+                <div class="italic text-gray-500">Belum ada tanda tangan diunggah</div>
+            @endif
+
+            <div>
+                <p class="font-bold">{{ $user->name ?? 'Nama Pejabat' }}</p>
+                <p>NIP. {{ $user->nip ?? '..........' }}</p>
+            </div>
         </div>
     </div>
 </div>

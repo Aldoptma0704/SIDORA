@@ -65,7 +65,7 @@
                                 class="w-full p-4 border-2 border-gray-300 rounded-xl shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
                                 required>
                             <option value="" disabled>-- Pilih Jenis Surat --</option>
-                            <option value="keluar_full">🏢 Surat Keluar (Dengan Kop Surat Lengkap)</option>
+                            <!-- <option value="keluar_full">🏢 Surat Keluar (Dengan Kop Surat Lengkap)</option> -->
                             <option value="keluar">📄 Surat Keluar (Template Standar)</option>
                         </select>
                         <p class="text-xs text-gray-500 mt-2">Pilih jenis surat sesuai dengan kebutuhan format dokumen</p>
@@ -75,7 +75,7 @@
                 {{-- Form Content (Show only when jenis is selected) --}}
                 <div x-show="jenis" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
 
-                    {{-- Step 2: Header Surat (Only for keluar_full) --}}
+                    <!-- {{-- Step 2: Header Surat (Only for keluar_full) --}}
                     <div x-show="jenis === 'keluar_full'" x-transition class="mb-8">
                         <div class="flex items-center mb-4">
                             <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-3">2</div>
@@ -126,7 +126,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     {{-- Step 3: Detail Surat --}}
                     <div class="mb-8">

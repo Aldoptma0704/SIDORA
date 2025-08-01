@@ -62,17 +62,22 @@
         }
         .signature-block {
             margin-top: 40px;
-            text-align: right;
+            text-align: right; /* Keeps the entire block on the right */
+        }
+        .signature-content { /* New class for the content within the signature block */
+            display: inline-block; /* Allows content to respect text-align of parent, but its own children can be left-aligned */
+            text-align: left; /* Aligns content inside this div to the left */
+            margin-left: 350px; /* Adjust this value to move it further right */
         }
         .signature-block p {
             margin: 0;
         }
         .signature-image {
             height: 80px;
-            width: 150px; /* Lebar eksplisit untuk tanda tangan */
+            width: 150px;
             display: block;
-            margin-left: auto;
-            margin-right: 0;
+            margin-left: 0; /* Align image to the left within its container */
+            margin-right: auto; /* Align image to the left within its container */
         }
         /* Gaya untuk konten dari Quill editor */
         .ql-editor p {
@@ -85,34 +90,42 @@
     </style>
 </head>
 <body>
-    <div class="header-section">
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
-            <tr>
-                <td class="header-logo-container">
-                    {{-- Gunakan base64Logo untuk rendering PDF --}}
-                    <img src="data:image/png;base64,{{ $base64Logo }}" alt="Logo" style="height: 90px; width: auto; max-width: 90px;">
-                </td>
-                <td class="header-text-container">
-                    <h1 class="header-text">PEMERINTAH PROVINSI LAMPUNG</h1>
-                    <h2 class="header-text">DINAS TENAGA KERJA</h2>
-                    <p class="header-text">
-                        Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
-                        Laman: <a href="https://disnaker.lampungprov.go.id" style="color: #2563eb; text-decoration: underline;">https://disnaker.lampungprov.go.id</a> |
-                        Pos-el: <a href="mailto:lampungnaker@gmail.com" style="color: #2563eb; text-decoration: underline;">lampungnaker@gmail.com</a>
-                    </p>
-                </td>
-            </tr>
-        </table>
-        <hr class="hr-line">
-    </div>
-    
+    {{-- Conditional Header Section --}}
+    @if ($surat->jenis !== 'keluar_full')
+        {{-- Default Lampung Provincial Government Header (ONLY if not 'keluar_full') --}}
+        <div class="header-section">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+                <tr>
+                    <td class="header-logo-container">
+                        {{-- Gunakan base64Logo untuk rendering PDF --}}
+                        <!-- <img src="data:image/png;base64,{{ $base64Logo }}" alt="Logo" style="height: 90px; width: auto; max-width: 90px;"> -->
+                        <img src="data:image/png;base64,{{ $base64Logo }}" alt="Logo" style="height: 90px; width: auto; max-width: 90px;">
+                    </td>
+                    <td class="header-text-container">
+                        <h1 class="header-text">PEMERINTAH PROVINSI LAMPUNG</h1>
+                        <h2 class="header-text">DINAS TENAGA KERJA</h2>
+                        <p class="header-text">
+                            Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
+                            Laman: <a href="https://disnaker.lampungprov.go.id" style="color: #2563eb; text-decoration: underline;">https://disnaker.lampungprov.go.id</a> |
+                            Pos-el: <a href="mailto:lampungnaker@gmail.com" style="color: #2563eb; text-decoration: underline;">lampungnaker@gmail.com</a>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    @endif
+
+    {{-- Custom Header Section (ONLY if 'keluar_full') --}}
     @if ($surat->jenis === 'keluar_full')
         <div class="header-section">
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
                 <tr>
                     <td class="header-logo-container">
-                        @if ($base64InstansiLogo)
-                            <img src="data:image/png;base64,{{ $base64InstansiLogo }}" alt="Logo Instansi" style="height: 90px; width: auto; max-width: 90px;">
+                        @if ($base64InstansiLogo) {{-- Menggunakan variabel base64InstansiLogo --}}
+                            <div class="shrink-0">
+                                {{-- Menggunakan variabel base64InstansiLogo yang sudah di-encode --}}
+                                <img src="{{ $base64InstansiLogo }}" alt="Logo Instansi" style="height: 90px; width: auto; max-width: 90px;">
+                            </div>
                         @endif
                     </td>
                     <td class="header-text-container">
@@ -122,9 +135,10 @@
                     </td>
                 </tr>
             </table>
-            <hr class="hr-line">
         </div>
     @endif
+
+    <hr class="hr-line">
 
     <div class="info-section">
         <p style="text-align: right; margin-bottom: 16px;">Bandar Lampung, {{ \Carbon\Carbon::parse($surat->created_at)->translatedFormat('d F Y') }}</p>
@@ -160,19 +174,21 @@
 
     <div class="signature-section">
         <div class="signature-block">
-            <p>{{ $user->position ?? 'Jabatan' }}</p>
-            <div style="margin-top: 16px;">
-                {{-- Logika untuk menampilkan tanda tangan hanya jika surat disetujui, dikirim, atau draft_pimpinan DAN ditandatangani --}}
-                @if (in_array($surat->status, ['disetujui', 'dikirim', 'draft_pimpinan']))
-                    <div style="margin-bottom: 8px;">
-                        <img src="data:image/png;base64,{{ $base64Signature }}" alt="Tanda Tangan" class="signature-image">
+            <div class="signature-content">
+                <p>{{ $user->position ?? 'Jabatan' }}</p>
+                <div style="margin-top: 16px;">
+                    {{-- Logika untuk menampilkan tanda tangan hanya jika surat disetujui, dikirim, atau draft_pimpinan DAN ditandatangani --}}
+                    @if (in_array($surat->status, ['disetujui', 'dikirim', 'draft_pimpinan']))
+                        <div style="margin-bottom: 8px;">
+                            <img src="{{ $base64Signature }}" alt="Tanda Tangan" class="signature-image">
+                        </div>
+                    @else
+                        <div style="font-style: italic; color: #6b7280;">Belum ditandatangani</div>
+                    @endif
+                    <div>
+                        <p style="font-weight: bold;">{{ $user->name ?? 'Nama Pejabat' }}</p>
+                        <p>NIP. {{ $user->nip ?? '..........' }}</p>
                     </div>
-                @else
-                    <div style="font-style: italic; color: #6b7280;">Belum ditandatangani</div>
-                @endif
-                <div>
-                    <p style="font-weight: bold;">{{ $user->name ?? 'Nama Pejabat' }}</p>
-                    <p>NIP. {{ $user->nip ?? '..........' }}</p>
                 </div>
             </div>
         </div>

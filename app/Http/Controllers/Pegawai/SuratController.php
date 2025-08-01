@@ -158,7 +158,7 @@ class SuratController extends Controller
         $surat->penandatangan_jabatan = $validatedData['penandatangan_jabatan'];
         $surat->penandatangan_nama = $validatedData['penandatangan_nama'];
         $surat->penandatangan_nip = $validatedData['penandatangan_nip'];
-        $surat->status = 'menunggu'; // Reset status menjadi 'menunggu' setiap kali diupdate
+        $surat->status = 'draft'; // Reset status menjadi 'menunggu' setiap kali diupdate
 
         if ($jenis == 'keluar_full') {
             // Isi data kop surat
