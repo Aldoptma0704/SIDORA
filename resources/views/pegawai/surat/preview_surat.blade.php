@@ -86,22 +86,22 @@
 
         {{-- Tanda tangan dengan QR Code di samping --}}
         <div class="flex justify-end mt-10">
-            <div class="flex-shrink-0 mr-8 self-center">
-                @if ($surat->status === 'disetujui' && $surat->signed_at)
-                    <img src="data:image/png;base64, {!! base64_encode(
-                        QrCode::format('png')->size(100)->generate(
-                            url('/verify-surat/' . $surat->id) . '|' . $surat->penandatangan_nama . ' | ' . \Carbon\Carbon::parse($surat->signed_at)->translatedFormat('d F Y H:i')
-                        )
-                    ) !!}" alt="QR Code">
-                @endif
-            </div>
-            <div class="text-right w-[300px]">
+            <div class="w-[150px] text-left">
                 <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
-                <div class="h-16"></div> {{-- Spacer untuk tanda tangan --}}
+                <!-- <div class="h-16"></div> {{-- Spacer untuk tanda tangan --}} -->
+                 <div style="margin-top: 16px;">
+                    @if (in_array($surat->status, ['disetujui', 'dikirim', 'draft_pimpinan']))
+                        <div style="margin-bottom: 8px;">
+                            <!-- <img src="{{ asset('storage/signatures/' . $surat->user->signature) }}" alt="Tanda Tangan" class="w-32 h-auto"> -->
+                            <img src="{{ asset('img/disetujui.png') }}" alt="Disetujui" class="h-24">
+                        </div>
+                    @else
+                        <div style="font-style: italic; color: #6b7280;">Belum ditandatangani</div>
+                    @endif
+                </div>
                 <p class="font-bold underline">{{ $surat->penandatangan_nama ?? 'Nama Pejabat' }}</p>
                 <p>NIP. {{ $surat->penandatangan_nip ?? '..........' }}</p>
             </div>
-
         </div>
 
     </div>
@@ -121,9 +121,9 @@
                     <a href="{{ route('surat.download', $surat->id) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
                         📄 Download PDF
                     </a>
-                    <a href="{{ route('surat.edit', $surat->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 shadow">
+                    <!-- <a href="{{ route('surat.edit', $surat->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 shadow">
                         ✏️ Edit Kembali
-                    </a>
+                    </a> -->
                 </div>
             </div>
         @endif

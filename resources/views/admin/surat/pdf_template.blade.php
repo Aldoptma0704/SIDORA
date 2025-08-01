@@ -60,20 +60,26 @@
             padding-right: 8px;
             white-space: nowrap;
         }
-        .signature-block {
+        /* --- START: Modified Signature Block Styles --- */
+        .signature-section {
+            display: block; /* Ensure it's a block for margin auto to work */
+            width: 40%; /* Adjust width as needed for the right side placement */
+            margin-left: auto; /* Push the block to the right */
+            margin-right: 0;
             margin-top: 40px;
-            text-align: right;
         }
         .signature-block p {
             margin: 0;
+            text-align: left; /* Align text within the block to the left */
         }
         .signature-image {
             height: 80px;
             width: 150px; /* Lebar eksplisit untuk tanda tangan */
             display: block;
-            margin-left: auto;
-            margin-right: 0;
+            /* No margin-left: auto; margin-right: 0; needed here as the parent block controls alignment */
         }
+        /* --- END: Modified Signature Block Styles --- */
+
         /* Gaya untuk konten dari Quill editor */
         .ql-editor p {
             margin-bottom: 1em;
@@ -185,11 +191,5 @@
             </div>
         </div>
     </div>
-    {{-- QR Code Section for PDF --}}
-    <div class="qr-section" style="text-align: right; margin-top: 20px; page-break-inside: avoid;">
-        @if ($surat->status === 'disetujui')
-            {!! QrCode::size(80)->generate(route('surat.show_public', $surat->id)) !!}
-        @endif
-    </div>
-</body>
+    </body>
 </html>

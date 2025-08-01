@@ -15,22 +15,46 @@
         </div>
     @endif
 
-    {{-- Header Logo & Informasi Dinas --}}
-    <div class="flex items-center justify-center mb-4">
-        <div class="shrink-0">
-            <img src="{{ asset('img/logo_lampung.png') }}" alt="Logo" style="height: 90px;">
-        </div>
-        <div class="ml-6 text-center">
-            <h1 class="text-lg font-bold uppercase">PEMERINTAH PROVINSI LAMPUNG</h1>
-            <h2 class="text-md font-semibold uppercase">DINAS TENAGA KERJA</h2>
-            <p class="text-sm">
-                Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
-                Laman: <a href="https://disnaker.lampungprov.go.id" class="text-blue-600 underline" target="_blank">https://disnaker.lampungprov.go.id</a> |
-                Pos-el: <a href="mailto:lampungnaker@gmail.com" class="text-blue-600 underline">lampungnaker@gmail.com</a>
-            </p>
-        </div>
-    </div>
-    <hr class="border-t-4 border-black my-4">
+{{-- ==================================================================== --}}
+        {{-- BLOK HEADER SURAT KONDISIONAL --}}
+
+        {{-- JIKA JENISNYA 'keluar_full', TAMPILKAN HEADER DINAMIS DARI DATABASE --}}
+        @if ($surat->jenis === 'keluar_full')
+            <div class="flex items-start justify-center mb-4 space-x-6">
+                @if ($surat->logo_instansi)
+                    <div class="shrink-0">
+                        <img src="{{ asset('storage/' . $surat->logo_instansi) }}" alt="Logo Instansi" class="h-24">
+                    </div>
+                @endif
+                
+                <div class="text-center">
+                    {{-- Render konten dari CKEditor --}}
+                    <div class="ql-editor p-0">{!! $surat->nama_instansi !!}</div>
+                    <div class="ql-editor p-0 text-xs">{!! $surat->alamat_instansi !!}</div>
+                    <div class="ql-editor p-0 text-xs">{!! $surat->kontak_instansi !!}</div>
+                </div>
+            </div>
+            <hr class="border-t-4 border-black my-4">
+
+        {{-- JIKA JENISNYA 'keluar' (TEMPLATE), TAMPILKAN HEADER STATIS/DEFAULT --}}
+        @else
+            <div class="flex items-center justify-center mb-4">
+                <div class="shrink-0">
+                    <img src="{{ asset('img/logo_lampung.png') }}" alt="Logo" class="h-24">
+                </div>
+                <div class="ml-6 text-center">
+                    <h1 class="text-lg font-bold uppercase">PEMERINTAH PROVINSI LAMPUNG</h1>
+                    <h2 class="text-md font-semibold uppercase">DINAS TENAGA KERJA</h2>
+                    <p class="text-xs">
+                        Jl. Gatot Subroto No.28 Kotak Pos 78 Telp. (0721) 252065, Fax. 262856 <br>
+                        Laman: <a href="https://disnaker.lampungprov.go.id" class="text-blue-600 underline" target="_blank">https://disnaker.lampungprov.go.id</a> |
+                        Pos-el: <a href="mailto:lampungnaker@gmail.com" class="text-blue-600 underline">lampungnaker@gmail.com</a>
+                    </p>
+                </div>
+            </div>
+            <hr class="border-t-4 border-black my-4">
+        @endif
+        {{-- ==================================================================== --}}
 
     {{-- Tanggal --}}
     <p class="text-right mb-4">Bandar Lampung, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
@@ -52,33 +76,33 @@
 
     <p class="mt-6">Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 
- {{-- Tanda tangan --}}
+{{-- Tanda tangan --}}
 <div class="mt-10 text-right">
-    
     <div class="flex flex-col items-end mt-4 space-y-2">
-        <div>
+        {{-- Jabatan --}}
+        <div class="text-left w-[150px]">
             <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
         </div>
+
         {{-- ✅ Tampilkan tanda tangan jika disetujui dan ada file signature --}}
         @if ($surat->status === 'disetujui' && $surat->signed_at && $penandatangan && $penandatangan->signature)
-            <div class="mb-2">
+            <div class="mb-2 text-left w-[150px]">
                 <img src="{{ asset('storage/signatures/' . $penandatangan->signature) }}" alt="Tanda Tangan" class="h-20">
             </div>
         @else
-            <div class="italic text-gray-500">
+            <div class="italic text-gray-500 text-left w-[150px]">
                 Belum ditandatangani
             </div>
         @endif
 
-
-        {{-- Nama & Jabatan --}}
-        <div>
+        {{-- Nama & NIP --}}
+        <div class="text-left w-[150px]">
             <p class="font-bold">{{ $surat->penandatangan_nama ?? 'Nama Pejabat' }}</p>
-            
             <p>NIP. {{ $surat->penandatangan_nip ?? '..........' }}</p>
         </div>
     </div>
-</div> 
+</div>
+
 
 {{-- Tombol Aksi --}}
 <div class="max-w-3xl mx-auto my-6">

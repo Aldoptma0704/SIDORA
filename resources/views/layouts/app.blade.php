@@ -163,12 +163,12 @@
                         <span class="font-medium">Laporan Surat</span>
                     </a>
 
-                    <a href="{{ route('admin.disposisi.masuk') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
+                    <!-- <a href="{{ route('admin.disposisi.masuk') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-inbox text-gray-600"></i>
                         </div>
                         <span class="font-medium">Disposisi Masuk</span>
-                    </a>
+                    </a> -->
 
                     <a href="{{ route('admin.disposisi.form') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">

@@ -88,7 +88,7 @@
                     <p class="text-xs text-gray-500">Pilih pegawai yang akan menerima disposisi surat</p>
                 </div>
 
-                <!-- Catatan Disposisi (Optional) -->
+                <!-- Catatan Disposisi (Optional)
                 <div class="space-y-2">
                     <label for="catatan" class="block text-sm font-semibold text-gray-900">
                         <span class="flex items-center space-x-2">
@@ -103,7 +103,7 @@
                               placeholder="Masukkan catatan atau instruksi khusus untuk disposisi ini..."
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 resize-none"></textarea>
                     <p class="text-xs text-gray-500">Berikan catatan atau instruksi tambahan jika diperlukan</p>
-                </div>
+                </div> -->
 
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200">

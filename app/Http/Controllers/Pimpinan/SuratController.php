@@ -319,7 +319,6 @@ class SuratController extends Controller
         // Redirect back with a success message
         return redirect()->route('pimpinan.surat.view', $surat->id)->with('success', 'Surat balasan berhasil diperbarui!');
     }
-
     /**
      * Generate and download the PDF for the specified surat.
      *
@@ -328,50 +327,91 @@ class SuratController extends Controller
      */
     public function download(Surat $surat)
     {
-        // Ensure the current authenticated user has the 'pimpinan' role to download
+        // Pastikan pengguna yang terautentikasi saat ini memiliki peran 'pimpinan' untuk mengunduh
         if (Auth::user()->role !== 'pimpinan') {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengunduh surat ini.');
         }
 
         $user = Auth::user();
 
-        // Base64 encode the main logo
+        // // Base64 encode logo utama
+        // $base64Logo = '';
+        // $logoPath = public_path('img/logo_lampung.png');
+        // if (file_exists($logoPath)) {
+        //     $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+        //     $base64Logo = 'data:image/' . $type . ';base64,' . base64_encode(file_get_contents($logoPath));
+        // } else {
+        //     // Uncomment baris ini untuk debugging jika logo utama tidak muncul
+        //     // dd('Logo utama tidak ditemukan di: ' . $logoPath);
+        // }
+
+        // Base64 encode logo utama
         $base64Logo = '';
         $logoPath = public_path('img/logo_lampung.png');
+
         if (file_exists($logoPath)) {
             $base64Logo = base64_encode(file_get_contents($logoPath));
+        } else {
+            // Uncomment this line for debugging if the main logo doesn't appear
+            // dd('Logo utama tidak ditemukan di: ' . $logoPath);
         }
 
-        // Base64 encode the signature image
+        // Pass $base64Logo to your view
+        // return view('surat.download', compact('base64Logo'));
+
+        // Base64 encode gambar tanda tangan
         $base64Signature = '';
         if ($user && $user->signature) {
             $signaturePath = Storage::disk('public')->path('signatures/' . $user->signature);
             if (file_exists($signaturePath)) {
-                $base64Signature = base64_encode(file_get_contents($signaturePath));
+                $type = pathinfo($signaturePath, PATHINFO_EXTENSION);
+                $base64Signature = 'data:image/' . $type . ';base64,' . base64_encode(file_get_contents($signaturePath));
+            } else {
+                // Uncomment baris ini untuk debugging jika tanda tangan tidak muncul
+                // dd('File tanda tangan tidak ditemukan di: ' . $signaturePath);
             }
         }
 
-        // Base64 encode the institution logo if it exists
+        // Base64 encode logo instansi jika ada dan jenis surat adalah 'keluar_full'
         $base64InstansiLogo = '';
         if ($surat->jenis === 'keluar_full' && $surat->logo_instansi) {
-            $instansiLogoPath = Storage::disk('public')->path('logo/' . $surat->logo_instansi);
+            // *** PERBAIKAN PENTING DI SINI ***
+            // Karena kolom logo_instansi sudah mengandung 'logos/', kita tidak perlu menambahkannya lagi.
+            $instansiLogoPath = Storage::disk('public')->path($surat->logo_instansi); 
+            
+            // --- DEBUGGING LOGO INSTANSI ---
+            // Uncomment baris di bawah ini satu per satu untuk debugging:
+            // dd('Path logo instansi: ' . $instansiLogoPath); // Cek apakah path sudah benar
+            
             if (file_exists($instansiLogoPath)) {
-                $base64InstansiLogo = base64_encode(file_get_contents($instansiLogoPath));
+                $type = pathinfo($instansiLogoPath, PATHINFO_EXTENSION);
+                $data = file_get_contents($instansiLogoPath);
+                
+                // if (empty($data)) {
+                //     dd('Isi file logo instansi kosong atau tidak bisa dibaca: ' . $instansiLogoPath);
+                // }
+
+                // Penting: tambahkan awalan data:image/...;base64,
+                $base64InstansiLogo = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+                // dd('Base64 Instansi Logo: ' . $base64InstansiLogo); // Cek string base64 yang dihasilkan
+            } else {
+                // dd('File logo instansi tidak ditemukan di: ' . $instansiLogoPath);
             }
         }
 
         $data = [
             'surat' => $surat,
             'user' => $user,
-            'base64Logo' => $base64Logo, // Pass base64 encoded main logo
-            'base64Signature' => $base64Signature, // Pass base64 encoded signature
-            'base64InstansiLogo' => $base64InstansiLogo, // Pass base64 encoded institution logo
+            'base64Logo' => $base64Logo,
+            'base64Signature' => $base64Signature,
+            'base64InstansiLogo' => $base64InstansiLogo,
         ];
 
-        // Load the dedicated PDF template
-        $pdf = Pdf::loadView('pimpinan.surat.pdf_template', $data); // Load the separate PDF template
+        // Muat template PDF khusus
+        $pdf = Pdf::loadView('pimpinan.surat.pdf_template', $data);
         $pdf->setPaper('A4', 'portrait');
-        $pdf->setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]); 
+        $pdf->setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
 
         return $pdf->download('surat_' . Str::slug($surat->judul) . '.pdf');
     }
