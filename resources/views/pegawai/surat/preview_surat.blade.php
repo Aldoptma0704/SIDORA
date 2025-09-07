@@ -84,46 +84,51 @@
         
         <p class="mt-6">Demikian atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
 
-        {{-- Tanda tangan dengan QR Code di samping --}}
         <div class="flex justify-end mt-10">
             <div class="w-[150px] text-left">
-                <p>{{ $surat->penandatangan_jabatan ?? 'Jabatan' }}</p>
-                <!-- <div class="h-16"></div> {{-- Spacer untuk tanda tangan --}} -->
-                 <div style="margin-top: 16px;">
-                    @if (in_array($surat->status, ['disetujui', 'dikirim', 'draft_pimpinan']))
-                        <div style="margin-bottom: 8px;">
-                            <!-- <img src="{{ asset('storage/signatures/' . $surat->user->signature) }}" alt="Tanda Tangan" class="w-32 h-auto"> -->
+                {{-- Jabatan bisa tetap dari input awal atau dari data pimpinan jika ada --}}
+                <p>{{ $surat->pengirim->position ?? $surat->penandatangan_jabatan }}</p>
+
+                <div class="h-24 flex items-center justify-start py-2">
+                    {{-- Cek jika status disetujui --}}
+                    @if ($surat->status === 'disetujui')
+
+                        {{-- Cek apakah relasi pengirim (pimpinan) ada & punya file signature --}}
+                        @if ($surat->pengirim && $surat->pengirim->signature)
+                            <img src="{{ asset('storage/signatures/' . $surat->pengirim->signature) }}" alt="Tanda Tangan" class="max-h-full max-w-full">
+                        @else
+                            {{-- Fallback jika pimpinan tidak punya ttd, tampilkan stempel --}}
                             <img src="{{ asset('img/disetujui.png') }}" alt="Disetujui" class="h-24">
-                        </div>
+                        @endif
+
                     @else
-                        <div style="font-style: italic; color: #6b7280;">Belum ditandatangani</div>
+                        {{-- Jika status bukan disetujui --}}
+                        <div class="italic text-gray-500">Belum ditandatangani</div>
                     @endif
                 </div>
-                <p class="font-bold underline">{{ $surat->penandatangan_nama ?? 'Nama Pejabat' }}</p>
-                <p>NIP. {{ $surat->penandatangan_nip ?? '..........' }}</p>
+
+                {{-- Tampilkan nama dan NIP dari pimpinan yang menyetujui --}}
+                <p class="font-bold underline">{{ $surat->pengirim->name ?? $surat->penandatangan_nama }}</p>
+                <p>NIP. {{ $surat->pengirim->nip ?? $surat->penandatangan_nip }}</p>
             </div>
         </div>
-
     </div>
 
     {{-- Blok Tombol Aksi --}}
     <div class="max-w-3xl mx-auto my-6 px-8 sm:px-0">
         @if (request('view') == 'status')
-            <a href="{{ route('surat.status_surat') }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow">
+            <a href="{{ route('pegawai.surat.status') }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow">
                 Kembali
             </a>
         @else
             <div class="flex justify-between items-center">
-                <a href="{{ route('surat.index') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow">
+                <a href="{{ route('pegawai.surat.index') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow">
                     ✅ Selesai & Kembali
                 </a>
                 <div class="flex space-x-2">
-                    <a href="{{ route('surat.download', $surat->id) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
+                    <a href="{{ route('pegawai.surat.download', $surat->id) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow">
                         📄 Download PDF
                     </a>
-                    <!-- <a href="{{ route('surat.edit', $surat->id) }}" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 shadow">
-                        ✏️ Edit Kembali
-                    </a> -->
                 </div>
             </div>
         @endif

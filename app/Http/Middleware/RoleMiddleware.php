@@ -15,6 +15,7 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {
+        //RBAC (role base access control)
         if (!Auth::check()) {
             return redirect()->route('login');
         }

@@ -39,7 +39,7 @@
         @endif
 
         <!-- Form Content -->
-        <form action="{{ route('users.update', $user) }}" method="POST" class="p-6">
+        <form action="{{ route('admin.users.update', $user) }}" method="POST" class="p-6">
             @csrf
             @method('PUT')
 
@@ -181,7 +181,7 @@
 
             <!-- Form Actions -->
             <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-                <a href="{{ route('users.index') }}" 
+                <a href="{{ route('admin.users.index') }}" 
                    class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Kembali

@@ -79,6 +79,12 @@
             margin-left: 0; /* Align image to the left within its container */
             margin-right: auto; /* Align image to the left within its container */
         }
+
+        p {
+            margin: 0 0 6px 0; /* bawah 6px saja, atas 0px */
+            line-height: 1.4; /* biar tetap enak dibaca */
+        }
+
         /* Gaya untuk konten dari Quill editor */
         .ql-editor p {
             margin-bottom: 1em;

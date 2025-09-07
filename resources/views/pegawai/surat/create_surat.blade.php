@@ -43,7 +43,7 @@
 
         {{-- Main Form --}}
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden" x-data="suratForm()">
-            <form action="{{ route('surat.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('pegawai.surat.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 {{-- Step Indicator --}}
@@ -244,7 +244,7 @@
 
                         {{-- Action Buttons --}}
                         <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
-                            <a href="{{ route('surat.index') }}" 
+                            <a href="{{ route('pegawai.surat.index') }}" 
                                class="px-8 py-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-semibold rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all transform hover:scale-105 shadow-md text-center">
                                 <i class="fas fa-times mr-2"></i>
                                 Batal

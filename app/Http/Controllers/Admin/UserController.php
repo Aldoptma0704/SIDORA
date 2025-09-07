@@ -83,7 +83,7 @@ class UserController extends Controller
             'nip' => $request->nip,           
         ]);
 
-        return redirect()->route('users.index')->with('success', 'Pengguna berhasil diupdate.');
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil diupdate.');
     }
 
     // Hapus Pengguna
@@ -95,24 +95,10 @@ class UserController extends Controller
 
     public function laporan()
     {
-        $surats = Surat::with('user')->latest()->get();
+        $surats = Surat::whereHas('user', function($query) {
+            $query->where('role', 'pegawai');
+        })->with('user')->latest()->get();
+        
         return view('admin.laporan.index', compact('surats'));
     }
-
-    //surat masuk dari pimpinan
-    // public function suratMasuk()
-    // {
-    //     $surats = \App\Models\Surat::where('status_balasan', 'dikirim')
-    //                 ->latest()
-    //                 ->get();
-
-    //     return view('admin.surat.masuk', compact('surats'));
-    // }
-
-    // public function lihat($id)
-    // {
-    //     $surat = \App\Models\Surat::findOrFail($id);
-    //     return view('admin.surat.lihat', compact('surat'));
-    // }
-
 }

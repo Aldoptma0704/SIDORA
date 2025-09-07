@@ -179,6 +179,13 @@
                                     <i class="fas fa-sort text-gray-400"></i>
                                 </div>
                             </th>
+                            <!-- Kolom Aksi -->
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-cogs text-gray-400"></i>
+                                    <span>Aksi</span>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="reportTableBody">
@@ -270,6 +277,14 @@
                                         </div>
                                     </div>
                                 </td>
+
+                                <!-- Actions -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+                                    <!-- Tombol Lihat Detail -->
+                                    <a href="{{ route('admin.surat.dari-pimpinan.lihat', $surat->id) }}" 
+                                       class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition">
+                                        <i class="fas fa-eye mr-1"></i> Lihat Detail
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach

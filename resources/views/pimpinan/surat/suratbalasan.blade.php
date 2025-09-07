@@ -48,7 +48,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('pimpinan.surat-balasan.simpan') }}" method="POST" enctype="multipart/form-data" class="p-8">
+            <form action="{{ route('pimpinan.surat.balas.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
                 @csrf
                 <input type="hidden" name="surat_asal_id" value="{{ $suratAsal->id ?? '' }}">
 
@@ -75,59 +75,6 @@
                 {{-- Form Content (Show only when jenis is selected) --}}
                 <div x-show="jenis" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
 
-                    <!-- {{-- Step 2: Header Surat (Only for keluar_full) --}}
-                    <div x-show="jenis === 'keluar_full'" x-transition class="mb-8">
-                        <div class="flex items-center mb-4">
-                            <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-sm mr-3">2</div>
-                            <h3 class="text-lg font-semibold text-gray-800">Header Surat</h3>
-                        </div>
-                        
-                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200">
-                            {{-- Logo Upload --}}
-                            <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Logo Instansi</label>
-                                <div class="flex items-center justify-center w-full">
-                                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-indigo-300 border-dashed rounded-xl cursor-pointer bg-white hover:bg-indigo-50 transition-colors duration-200">
-                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <svg class="w-8 h-8 mb-4 text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                                            </svg>
-                                            <p class="mb-2 text-sm text-indigo-500"><span class="font-semibold">Klik untuk upload</span> atau drag & drop</p>
-                                            <p class="text-xs text-indigo-400">PNG, JPG atau GIF (MAX. 2MB)</p>
-                                        </div>
-                                        <input type="file" name="logo_instansi_file" accept="image/*" class="hidden">
-                                    </label>
-                                </div>
-                            </div>
-
-                            {{-- Instansi Info Grid --}}
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Instansi <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <div id="editor_nama_instansi" class="w-full border-2 border-gray-300 rounded-xl p-4 min-h-[80px] bg-white focus-within:border-indigo-500 transition-colors duration-200">{!! old('nama_instansi') !!}</div>
-                                        <input type="hidden" name="nama_instansi" value="{{ old('nama_instansi') }}">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon / Kontak</label>
-                                    <div class="relative">
-                                        <div id="editor_kontak_instansi" class="w-full border-2 border-gray-300 rounded-xl p-4 min-h-[80px] bg-white focus-within:border-indigo-500 transition-colors duration-200">{!! old('kontak_instansi') !!}</div>
-                                        <input type="hidden" name="kontak_instansi" value="{{ old('kontak_instansi') }}">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Instansi</label>
-                                <div class="relative">
-                                    <div id="editor_alamat_instansi" class="w-full border-2 border-gray-300 rounded-xl p-4 min-h-[80px] bg-white focus-within:border-indigo-500 transition-colors duration-200">{!! old('alamat_instansi') !!}</div>
-                                    <input type="hidden" name="alamat_instansi" value="{{ old('alamat_instansi') }}">
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
                     {{-- Step 3: Detail Surat --}}
                     <div class="mb-8">
                         <div class="flex items-center mb-4">
@@ -141,17 +88,11 @@
                             {{-- Basic Info Grid --}}
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Surat</label>
-                                    <div class="relative">
-                                        <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}" 
-                                               class="w-full p-4 border-2 border-gray-300 rounded-xl shadow-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
-                                               placeholder="Contoh: 001/DS/2024">
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
-                                            </svg>
-                                        </div>
-                                    </div>
+                                    <label for="nomor_surat" class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat</label>
+                                    <input type="text" name="nomor_surat" id="nomor_surat" 
+                                           value="{{ old('nomor_surat', $surat->nomor_surat ?? '') }}" 
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5" 
+                                           required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Sifat</label>

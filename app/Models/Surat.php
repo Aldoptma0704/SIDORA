@@ -11,11 +11,11 @@ class Surat extends Model
 
     protected $fillable = [
         'user_id',
-        'judul', // Ini kita gunakan sebagai 'Hal'
-        'jenis', // 'masuk' atau 'keluar'
+        'pengirim_id',
+        'judul', 
+        'jenis', 
         'isi',
         'status',
-        // Tambahkan semua kolom baru di sini
         'nomor_surat',
         'sifat',
         'lampiran',
@@ -31,7 +31,7 @@ class Surat extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function disposisiKepada()

@@ -71,7 +71,7 @@
                             <i class="fas fa-upload mr-2 group-hover:rotate-12 transition-transform"></i> 
                             Upload PDF
                         </button>
-                        <a href="{{ route('surat.create') }}" 
+                        <a href="{{ route('pegawai.surat.create') }}" 
                            class="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
                             <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform"></i> 
                             Buat Surat Baru
@@ -90,7 +90,7 @@
                         <h3 class="text-2xl font-bold text-gray-800">Upload File Surat</h3>
                     </div>
                     
-                    <form action="{{ route('surat.upload_pdf') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('pegawai.surat.upload-pdf') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="jenis" value="{{ $jenis ?? 'masuk' }}">
                         
@@ -214,7 +214,7 @@
                                                     PDF
                                                 </a>
                                             @else
-                                                <a href="{{ route('surat.preview', $surat->id) }}" 
+                                                <a href="{{ route('pegawai.surat.preview', $surat->id) }}" 
                                                    class="group inline-flex items-center px-3 py-2 text-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                                                     <i class="fas fa-eye mr-1 group-hover:scale-110 transition-transform"></i> 
                                                     Lihat
@@ -223,11 +223,11 @@
 
                                             {{-- Tombol Edit & Hapus hanya untuk draft --}}
                                             @if ($surat->status == 'draft' && $surat->user_id == auth()->id())
-                                                <a href="{{ route('surat.edit', $surat->id) }}" 
+                                                <a href="{{ route('pegawai.surat.edit', $surat->id) }}" 
                                                    class="group inline-flex items-center px-3 py-2 text-sm text-white bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                                                     <i class="fas fa-pencil-alt group-hover:rotate-12 transition-transform"></i>
                                                 </a>
-                                                <form action="{{ route('surat.destroy', $surat->id) }}" method="POST" class="inline-block" 
+                                                <form action="{{ route('pegawai.surat.destroy', $surat->id) }}" method="POST" class="inline-block" 
                                                       onsubmit="return confirm('Anda yakin ingin menghapus draft surat ini?');">
                                                     @csrf
                                                     @method('DELETE')

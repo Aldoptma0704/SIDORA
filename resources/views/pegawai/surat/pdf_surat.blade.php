@@ -142,22 +142,19 @@
         <table class="header-table">
             <tr>
                 <td class="logo">
-                    @if ($surat->logo_instansi)
-                        <img src="{{ public_path('storage/' . $surat->logo_instansi) }}" alt="Logo">
+                    @if ($surat->logo_instansi && file_exists(storage_path('app/public/' . $surat->logo_instansi)))
+                        <img src="{{ storage_path('app/public/' . $surat->logo_instansi) }}" alt="Logo">
                     @endif
                 </td>
                 <td class="dynamic-header">
-                    {{-- Nama Instansi akan menggunakan style default .dynamic-header --}}
                     <div class="ql-editor">{!! $surat->nama_instansi !!}</div>
-                    
-                    {{-- Alamat & Kontak akan menggunakan style override dari .address --}}
                     <div class="ql-editor address">{!! $surat->alamat_instansi !!}</div>
                     <div class="ql-editor address">{!! $surat->kontak_instansi !!}</div>
                 </td>
             </tr>
         </table>
         <div class="line"></div>
-
+        
     @else
         <table class="header-table">
             <tr>
