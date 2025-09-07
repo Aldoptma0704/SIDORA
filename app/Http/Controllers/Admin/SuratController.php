@@ -9,13 +9,20 @@ use Illuminate\Support\Facades\Auth; // Pastikan ini di-import
 use Illuminate\Support\Facades\Storage; // Pastikan ini di-import
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // Pastikan ini di-import jika digunakan di controller
 use Barryvdh\DomPDF\Facade\Pdf; // Pastikan ini di-import jika digunakan untuk download PDF
-use Illuminate\Support\Str; // Pastikan ini di-import jika digunakan untuk slug
+use Illuminate\Support\Str; 
 
 class SuratController extends Controller
 {
     public function suratMasuk()
     {
-        $surats = Surat::where('status', 'dikirim')->latest()->get();
+        $surats = Surat::where('status', 'disetujui')
+            ->whereHas('user', function($query) {
+                $query->where('role', 'pimpinan');
+            })
+            ->with(['user', 'pengirim'])
+            ->latest()
+            ->get();
+
         return view('admin.surat.masuk', compact('surats'));
     }
 
@@ -79,12 +86,6 @@ class SuratController extends Controller
         return view('admin.surat.disposisi_masuk', compact('surats'));
     }
 
-    /**
-     * Generate and download the PDF for the specified surat (for Admin).
-     *
-     * @param  \App\Models\Surat  $surat
-     * @return \Illuminate\Http\Response
-     */
     public function download(Surat $surat)
     {
         // Pastikan hanya admin yang bisa mengunduh
@@ -128,8 +129,6 @@ class SuratController extends Controller
             'base64InstansiLogo' => $base64InstansiLogo, // Pass base64 encoded institution logo
         ];
 
-        // Load the dedicated PDF template
-        // BARIS YANG ANDA TANYAKAN BERADA DI SINI
         $pdf = Pdf::loadView('admin.surat.pdf_template', $data); 
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]); 

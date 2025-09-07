@@ -15,7 +15,7 @@
                 </div>
             </div>
             
-            <a href="{{ route('users.create') }}" 
+            <a href="{{ route('admin.users.create') }}" 
                class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
                 <i class="fas fa-user-plus mr-2"></i>
                 Tambah Pengguna
@@ -175,7 +175,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="flex justify-center items-center gap-2">
                                 <!-- Edit Button -->
-                                <a href="{{ route('users.edit', $user) }}" 
+                                <a href="{{ route('admin.users.edit', $user) }}" 
                                    class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shadow-sm">
                                     <i class="fas fa-edit mr-1"></i>
                                     Edit
@@ -183,7 +183,7 @@
 
                                 <!-- Delete Button -->
                                 <form method="POST" 
-                                      action="{{ route('users.destroy', $user) }}" 
+                                      action="{{ route('admin.users.destroy', $user) }}" 
                                       class="inline-block" 
                                       onsubmit="return confirm('Yakin ingin menghapus pengguna {{ $user->name }}?')">
                                     @csrf

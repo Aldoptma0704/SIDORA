@@ -16,7 +16,7 @@
                 <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
                     Total: {{ $users->count() }} pengguna
                 </span>
-                <a href="{{ route('users.create') }}" 
+                <a href="{{ route('admin.users.create') }}" 
                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Tambah Pengguna
@@ -161,14 +161,14 @@
                                     <div class="flex items-center justify-center space-x-2">
 
                                         <!-- Edit Button -->
-                                        <a href="{{ route('users.edit', $user) }}" 
+                                        <a href="{{ route('admin.users.edit', $user) }}" 
                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-yellow-600 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors duration-200"
                                            title="Edit Pengguna">
                                             <i class="fas fa-edit"></i>
                                         </a>
 
                                         <!-- Delete Button -->
-                                        <form method="POST" action="{{ route('users.destroy', $user) }}" class="inline-block">
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" 
@@ -200,7 +200,7 @@
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada pengguna</h3>
                 <p class="text-gray-500 mb-6">Mulai dengan menambahkan pengguna pertama ke sistem</p>
-                <a href="{{ route('users.create') }}" 
+                <a href="{{ route('admin.users.create') }}" 
                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Tambah Pengguna Pertama

@@ -9,8 +9,21 @@ use App\Models\Surat;
 
 class dashboardcontroller extends Controller
 {
+    
     public function index()
     {
+        dd(auth()->user()->role);
+        
+        if (auth()->user()->role == 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif (auth()->user()->role == 'pegawai') {
+            return redirect()->route('pegawai.dashboard');
+        } elseif (auth()->user()->role == 'pimpinan') {
+            return redirect()->route('pimpinan.dashboard');
+        } else {
+            Auth::logout();
+            return redirect()->route('login')->withErrors('Role tidak dikenali.');
+        }
         $surat = Surat::where('user_id', auth()->id())->get();
         return view('pegawai.surat.index', compact('surats'));
     }

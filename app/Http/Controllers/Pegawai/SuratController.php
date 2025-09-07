@@ -100,8 +100,7 @@ class SuratController extends Controller
         $surat->status = 'draft'; 
         $surat->save();
 
-        // FIXED: Redirect ke route 'surat.index' tidak memerlukan parameter
-        return redirect()->route('surat.index')->with('success', 'Draft surat berhasil dibuat!');
+        return redirect()->route('pegawai.surat.index')->with('success', 'Draft surat berhasil dibuat!');
     }
 
     public function preview($id)
@@ -123,7 +122,7 @@ class SuratController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-        public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $surat = Surat::findOrFail($id);
         $jenis = $request->jenis;
@@ -140,14 +139,12 @@ class SuratController extends Controller
             'penandatangan_nama' => 'required|string|max:255',
             'penandatangan_nip' => 'required|string|max:255',
             
-            // Aturan untuk field kop surat (tidak wajib)
             'nama_instansi' => 'nullable|string',
             'alamat_instansi' => 'nullable|string',
             'kontak_instansi' => 'nullable|string',
             'logo_instansi_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Gunakan data yang sudah divalidasi
         $surat->jenis = $validatedData['jenis'];
         $surat->judul = $validatedData['judul'];
         $surat->isi = Purifier::clean($validatedData['isi']);
@@ -161,21 +158,17 @@ class SuratController extends Controller
         $surat->status = 'draft'; // Reset status menjadi 'menunggu' setiap kali diupdate
 
         if ($jenis == 'keluar_full') {
-            // Isi data kop surat
             $surat->nama_instansi = Purifier::clean($request->nama_instansi);
             $surat->alamat_instansi = Purifier::clean($request->alamat_instansi);
             $surat->kontak_instansi = Purifier::clean($request->kontak_instansi);
             
             // Handle file upload untuk logo jika ada
             if ($request->hasFile('logo_instansi_file')) {
-                // Hapus logo lama jika ada
-                // Storage::delete('public/' . $surat->logo_instansi);
                 $path = $request->file('logo_instansi_file')->store('logos', 'public');
                 $surat->logo_instansi = $path;
             }
 
         } else {
-            // Kosongkan data kop surat jika jenisnya diubah menjadi template standar
             $surat->nama_instansi = null;
             $surat->alamat_instansi = null;
             $surat->kontak_instansi = null;
@@ -184,20 +177,18 @@ class SuratController extends Controller
 
         $surat->save();
 
-        return redirect()->route('surat.preview', $surat->id)->with('success', 'Surat berhasil diperbarui!');
+        return redirect()->route('pegawai.surat.preview', $surat->id)->with('success', 'Surat berhasil diperbarui!');
     }
 
     public function download($id)
     {
         $surat = Surat::findOrFail($id);
         
-        // Buat nama file yang aman dengan mengganti '/' menjadi '-'
         $safeFileName = str_replace('/', '-', $surat->nomor_surat);
         
         $pdf = \PDF::loadView('pegawai.surat.pdf_surat', compact('surat'))
                      ->setPaper('A4', 'portrait');
         
-        // Gunakan nama file yang sudah aman
         return $pdf->download('surat_' . $safeFileName . '.pdf');
     }
     
@@ -240,25 +231,19 @@ class SuratController extends Controller
              ->where('status', 'draft')
              ->update(['status' => 'menunggu']);
 
-        return redirect()->route('surat.status_surat')->with('success', 'Surat berhasil diajukan untuk persetujuan.');
+        return redirect()->route('pegawai.surat.status')->with('success', 'Surat berhasil diajukan untuk persetujuan.');
     }
 
     public function destroy($id)
     {
         $surat = Surat::findOrFail($id);
 
-        // Otorisasi: Pastikan hanya pemilik surat yang bisa menghapus,
-        // dan hanya jika statusnya masih 'draft'.
         if ($surat->user_id != auth()->id()) {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menghapus surat ini.');
         }
-
-        // Khususnya untuk draft, kita berikan izin hapus
         if ($surat->status != 'draft') {
              return redirect()->back()->with('error', 'Hanya surat dengan status draft yang bisa dihapus.');
         }
-
-        // Hapus file terkait jika ada (logo atau file PDF yang diupload)
         if ($surat->logo_instansi) {
             Storage::disk('public')->delete($surat->logo_instansi);
         }
@@ -267,8 +252,7 @@ class SuratController extends Controller
         }
 
         $surat->delete();
-
-        return redirect()->route('surat.index')->with('success', 'Draft surat berhasil dihapus.');
+        return redirect()->route('pegawai.surat.index')->with('success', 'Draft surat berhasil dihapus.');
     }
     
     public function bulkDelete(Request $request)
@@ -277,18 +261,20 @@ class SuratController extends Controller
             'ids' => 'required|array',
             'ids.*' => 'exists:surats,id',
         ]);
-
+    
         $suratIds = $request->input('ids');
         $userId = auth()->id();
-
+    
+        // hanya ambil surat milik user dan status bukan 'menunggu'
         $suratsToDelete = Surat::where('user_id', $userId)
                                ->whereIn('id', $suratIds)
+                               ->whereIn('status', ['disetujui', 'ditolak'])
                                ->get();
-
+    
         if ($suratsToDelete->isEmpty()) {
             return redirect()->back()->with('error', 'Tidak ada surat yang valid untuk dihapus.');
         }
-
+    
         foreach ($suratsToDelete as $surat) {
             // Hapus file terkait jika ada
             if ($surat->logo_instansi) {
@@ -297,10 +283,11 @@ class SuratController extends Controller
             if ($surat->file_path) {
                 Storage::disk('public')->delete($surat->file_path);
             }
+        
             // Hapus record surat dari database
             $surat->delete();
         }
-
+    
         return redirect()->back()->with('success', 'Surat yang dipilih berhasil dihapus.');
     }
 
@@ -323,7 +310,27 @@ class SuratController extends Controller
         $surat->status = 'menunggu';
         $surat->save();
 
-        return redirect()->route('surat.index')->with('success', 'File surat berhasil diunggah.');
+        return redirect()->route('pegawai.surat.index')->with('success', 'File surat berhasil diunggah.');
     }
+
+    public function updateApi(Request $request, $id)
+    {
+        $surat = Surat::findOrFail($id);
+
+        // update field sesuai kebutuhan
+        $surat->update($request->only([
+            'perihal',
+            'tujuan',
+            'isi',
+            'tanggal'
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Surat berhasil diupdate',
+            'data' => $surat
+        ]);
+    }
+
 }
 

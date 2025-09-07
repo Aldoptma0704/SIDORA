@@ -181,12 +181,6 @@
         </div>
     </div>
 
-    {{-- QR Code Section for PDF --}}
-    <div class="qr-section" style="text-align: right; margin-top: 20px; page-break-inside: avoid;">
-        @if ($surat->status === 'disetujui')
-            {!! QrCode::size(80)->generate(route('surat.show_public', $surat->id)) !!}
-        @endif
-    </div>
 
 </body>
 </html>
@@ -409,12 +403,6 @@
                     </div>
                 </div>
 
-                {{-- QR Code for Web --}}
-                @if ($surat->status === 'disetujui')
-                    <div class="mt-4 text-right">
-                        {!! QrCode::size(100)->generate(route('surat.show_public', $surat->id)) !!}
-                    </div>
-                @endif
             </div>
         </div>
     </div>

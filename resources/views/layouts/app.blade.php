@@ -149,7 +149,7 @@
                         <span class="font-medium">Dashboard Admin</span>
                     </a>
 
-                    <a href="{{ route('users.index') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
+                    <a href="{{ route('admin.users.index') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-users-cog text-gray-600"></i>
                         </div>
@@ -205,22 +205,22 @@
                             <i class="fas transition-transform duration-200" :class="{'fa-chevron-up': open, 'fa-chevron-down': !open}"></i>
                         </button>
                         <div x-show="open" x-transition class="ml-6 space-y-1 bg-gray-50 rounded-lg p-2">
-                            <a href="{{ route('surat.index') }}" class="block px-4 py-2 rounded-lg text-sm hover:bg-white hover:shadow-sm {{ !request('jenis') && request()->routeIs('surat.index') ? 'text-primary-600 font-semibold bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
+                            <a href="{{ route('pegawai.surat.index') }}" class="block px-4 py-2 rounded-lg text-sm hover:bg-white hover:shadow-sm {{ !request('jenis') && request()->routeIs('surat.index') ? 'text-primary-600 font-semibold bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
                                 <i class="fas fa-list w-4 mr-2"></i>
                                 Semua Surat
                             </a>
-                            <a href="{{ route('surat.index', ['jenis' => 'masuk']) }}" class="block px-4 py-2 rounded-lg text-sm hover:bg-white hover:shadow-sm {{ request('jenis') == 'masuk' ? 'text-primary-600 font-semibold bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
+                            <a href="{{ route('pegawai.surat.index', ['jenis' => 'masuk']) }}" class="block px-4 py-2 rounded-lg text-sm hover:bg-white hover:shadow-sm {{ request('jenis') == 'masuk' ? 'text-primary-600 font-semibold bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
                                 <i class="fas fa-inbox w-4 mr-2"></i>
                                 Surat Masuk
                             </a>
-                            <a href="{{ route('surat.index', ['jenis' => 'keluar']) }}" class="block px-4 py-2 rounded-lg text-sm hover:bg-white hover:shadow-sm {{ request('jenis') == 'keluar' ? 'text-primary-600 font-semibold bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
+                            <a href="{{ route('pegawai.surat.index', ['jenis' => 'keluar']) }}" class="block px-4 py-2 rounded-lg text-sm hover:bg-white hover:shadow-sm {{ request('jenis') == 'keluar' ? 'text-primary-600 font-semibold bg-white shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
                                 <i class="fas fa-paper-plane w-4 mr-2"></i>
                                 Surat Keluar
                             </a>
                         </div>
                     </div>
 
-                    <a href="{{ route('surat.status_surat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
+                    <a href="{{ route('pegawai.surat.status') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-info-circle text-gray-600"></i>
                         </div>
@@ -244,7 +244,7 @@
                         <span class="font-medium">Disposisi Surat</span>
                     </a>
 
-                    <a href="{{ route('pimpinan.statussurat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
+                    <a href="{{ route('pimpinan.status-surat') }}" class="sidebar-link flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700">
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-table text-gray-600"></i>
                         </div>

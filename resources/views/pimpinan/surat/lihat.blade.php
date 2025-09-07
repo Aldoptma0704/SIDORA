@@ -284,7 +284,7 @@
     {{-- Tombol Aksi --}}
     <div class="max-w-3xl mx-auto my-6">
         <div class="flex justify-between items-center">
-            <a href="{{ route('pimpinan.statussurat') }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow">
+            <a href="{{ route('pimpinan.status-surat') }}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow">
                 Kembali
             </a>
             <div class="flex space-x-2">

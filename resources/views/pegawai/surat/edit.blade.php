@@ -65,7 +65,7 @@
              }"
              x-init="initAllEditors()">
 
-            <form action="{{ route('surat.update', $surat->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('pegawai.surat.update', $surat->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -275,7 +275,7 @@
 
                         {{-- Action Buttons --}}
                         <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
-                            <a href="{{ route('surat.preview', $surat->id) }}" 
+                            <a href="{{ route('pegawai.surat.preview', $surat->id) }}" 
                                class="px-8 py-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-semibold rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all transform hover:scale-105 shadow-md text-center">
                                 <i class="fas fa-times mr-2"></i>
                                 Batal

@@ -101,7 +101,8 @@
                     Hapus Terpilih
                 </button>
             </div>
-            
+        </div>
+    </div>  
 
     {{-- Enhanced Modal --}}
     <div x-show="showModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
@@ -118,7 +119,7 @@
                 </div>
             </div>
             
-            <form action="{{ route('surat.ajukan') }}" method="POST">
+            <form action="{{ route('pegawai.surat.ajukan') }}" method="POST">
                 @csrf
                 <div class="p-6 max-h-96 overflow-y-auto">
                     <div class="space-y-3">
@@ -179,7 +180,7 @@
 
     {{-- Enhanced Table --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <form action="{{ route('surat.bulk_delete') }}" method="POST" id="bulkDeleteForm">
+        <form action="{{ route('pegawai.surat.bulk-delete') }}" method="POST" id="bulkDeleteForm">
             @csrf
             @method('DELETE')
             
@@ -202,8 +203,13 @@
                         @forelse ($surats as $index => $surat)
                             <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group">
                                 <td class="px-6 py-4">
-                                    <input type="checkbox" name="ids[]" value="{{ $surat->id }}" class="surat-checkbox h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" @change="selectedItems = Array.from(document.querySelectorAll('.surat-checkbox:checked')).map(cb => cb.value)">
+                                    @if ($surat->status !== 'menunggu')
+                                        <input type="checkbox" name="ids[]" value="{{ $surat->id }}"
+                                            class="surat-checkbox h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            @change="selectedItems = Array.from(document.querySelectorAll('.surat-checkbox:checked')).map(cb => cb.value)">
+                                    @endif
                                 </td>
+
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-900">{{ $surat->judul }}</div>
@@ -233,7 +239,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('surat.preview', ['id' => $surat->id, 'view' => 'status']) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200">
+                                        <a href="{{ route('pegawai.surat.preview', ['id' => $surat->id, 'view' => 'status']) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200">
                                             <i class="fas fa-eye mr-1"></i>
                                             Lihat
                                         </a>
@@ -267,9 +273,7 @@
 
 @push('scripts')
 <script>
-    // Enhanced JavaScript for better UX
     document.addEventListener('DOMContentLoaded', function() {
-        // Auto-hide success messages after 5 seconds
         setTimeout(() => {
             const alerts = document.querySelectorAll('[x-data*="show: true"]');
             alerts.forEach(alert => {
@@ -279,7 +283,6 @@
             });
         }, 5000);
 
-        // Enhanced select all functionality
         const selectAllCheckbox = document.querySelector('input[type="checkbox"]:not(.surat-checkbox)');
         const itemCheckboxes = document.querySelectorAll('.surat-checkbox');
         
@@ -291,7 +294,6 @@
             });
         }
 
-        // Update select all based on individual selections
         itemCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const checkedCount = document.querySelectorAll('.surat-checkbox:checked').length;

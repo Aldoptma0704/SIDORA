@@ -24,15 +24,10 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <a href="{{ route('surat.create') }}" 
+                        <a href="{{ route('pegawai.surat.create') }}" 
                            class="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
                             <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform duration-200"></i> 
                             Buat Surat Baru
-                        </a>
-                        <a href="#ajukan-persetujuan" 
-                           class="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-lg hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200">
-                            <i class="fas fa-paper-plane mr-2 group-hover:translate-x-1 transition-transform duration-200"></i> 
-                            Ajukan Persetujuan
                         </a>
                     </div>
                 </div>
@@ -115,7 +110,7 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="{{ route('surat.index') }}" class="group flex items-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl hover:from-blue-100 hover:to-purple-100 transition-all duration-200">
+                <a href="{{ route('pegawai.surat.index') }}" class="group flex items-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl hover:from-blue-100 hover:to-purple-100 transition-all duration-200">
                     <div class="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mr-3 group-hover:scale-110 transition-transform duration-200">
                         <i class="fas fa-list text-white"></i>
                     </div>
