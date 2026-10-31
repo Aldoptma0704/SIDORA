@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto" x-data="userForm()">
     <!-- Page Header -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center gap-4">
@@ -10,7 +10,7 @@
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Tambah Pengguna Baru</h1>
-                <p class="text-gray-600 mt-1">Lengkapi formulir di bawah untuk menambahkan pengguna baru ke sistem SIDORA</p>
+                <p class="text-gray-600 mt-1">Lengkapi formulir di bawah sesuai dengan struktur organisasi Dinas Tenaga Kerja Provinsi Lampung</p>
             </div>
         </div>
     </div>
@@ -38,16 +38,88 @@
     @endif
 
     <!-- Form -->
-    <form action="{{ route('users.store') }}" method="POST" class="space-y-6">
+    <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-6">
         @csrf
 
-        <!-- Personal Information Section -->
+        <!-- 1. Role & Bagian Section (Pertama-tama Pilih Role) -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center gap-3 mb-6 pb-3 border-b border-gray-100">
+                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-purple-600"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">1. Peran & Penugasan Struktur</h2>
+                    <p class="text-xs text-gray-500">Pilih Role terlebih dahulu untuk menyesuaikan Bagian/Subbagian</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Role (Pertama Dipilih) -->
+                <div>
+                    <label for="role" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Peran (Role) Pengguna <span class="text-red-500">*</span>
+                    </label>
+                    <select name="role" 
+                            id="role" 
+                            x-model="selectedRole" 
+                            @change="onRoleChange()"
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium text-gray-800 bg-white @error('role') border-red-500 @enderror">
+                        <option value="">-- Pilih Role Terlebih Dahulu --</option>
+                        <option value="admin">🛡️ Administrator (Subbag Umum & Kepegawaian)</option>
+                        <option value="pimpinan">👑 Pimpinan (Kadis, Sekdis, Kasubbag, Kepala Staf, Kabid, Kepala UPTD)</option>
+                        <option value="pegawai">👤 Pegawai (Seksi Bidang, Subbag TU UPTD, Staf)</option>
+                    </select>
+                    @error('role')
+                        <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                <!-- Bagian/Subbagian (Dinamis Sesuai Role) -->
+                <div>
+                    <label for="bagian" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Bagian / Subbagian <span class="text-red-500">*</span>
+                    </label>
+                    <select name="bagian" 
+                            id="bagian"
+                            x-model="selectedBagian"
+                            @change="onBagianChange()"
+                            :disabled="!selectedRole"
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-800 bg-white disabled:bg-gray-100 disabled:text-gray-400 @error('bagian') border-red-500 @enderror">
+                        <option value="" x-text="!selectedRole ? '-- Pilih Role Terlebih Dahulu --' : '-- Pilih Bagian / Subbagian --'"></option>
+                        
+                        {{-- Opsi dinamis dimuat oleh AlpineJS/JS --}}
+                        <template x-for="item in currentBagianOptions" :key="item.value">
+                            <option :value="item.value" x-text="item.label" :selected="item.value === selectedBagian"></option>
+                        </template>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1" x-show="selectedRole === 'admin'">
+                        *Untuk Role Admin, bagian otomatis ditujukan ke <strong>Sub Bagian Umum dan Kepegawaian</strong>.
+                    </p>
+                    @error('bagian')
+                        <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Personal Information Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center gap-3 mb-6 pb-3 border-b border-gray-100">
                 <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-user text-blue-600"></i>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-900">Informasi Personal</h2>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">2. Informasi Personal Pegawai</h2>
+                    <p class="text-xs text-gray-500">Identitas pegawai dan jabatan resmi</p>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -62,7 +134,7 @@
                            value="{{ old('name') }}" 
                            required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('name') border-red-500 @enderror"
-                           placeholder="Masukkan nama lengkap">
+                           placeholder="Contoh: Dr. H. Agus Nompitu, S.E., M.T.P.">
                     @error('name')
                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
                             <i class="fas fa-exclamation-circle"></i>
@@ -74,7 +146,7 @@
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                        Email <span class="text-red-500">*</span>
+                        Email Resmi <span class="text-red-500">*</span>
                     </label>
                     <input type="email" 
                            name="email" 
@@ -82,7 +154,7 @@
                            value="{{ old('email') }}" 
                            required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('email') border-red-500 @enderror"
-                           placeholder="contoh@example.com">
+                           placeholder="contoh@disnaker.lampungprov.go.id">
                     @error('email')
                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
                             <i class="fas fa-exclamation-circle"></i>
@@ -91,17 +163,18 @@
                     @enderror
                 </div>
 
-                <!-- Position -->
+                <!-- Position / Jabatan -->
                 <div>
                     <label for="position" class="block text-sm font-medium text-gray-700 mb-2">
-                        Jabatan
+                        Jabatan Resmi <span class="text-red-500">*</span>
                     </label>
                     <input type="text" 
                            name="position" 
                            id="position" 
-                           value="{{ old('position') }}"
+                           x-model="selectedPosition"
+                           required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('position') border-red-500 @enderror"
-                           placeholder="Masukkan jabatan">
+                           placeholder="Contoh: Kepala Dinas / Kasubbag / Kepala Seksi / Staf">
                     @error('position')
                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
                             <i class="fas fa-exclamation-circle"></i>
@@ -120,7 +193,7 @@
                            id="nip" 
                            value="{{ old('nip') }}"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('nip') border-red-500 @enderror"
-                           placeholder="Masukkan NIP">
+                           placeholder="Contoh: 19750812 199903 1 002">
                     @error('nip')
                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
                             <i class="fas fa-exclamation-circle"></i>
@@ -131,96 +204,16 @@
             </div>
         </div>
 
-        <!-- Role & Department Section -->
+        <!-- 3. Security Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-shield-alt text-purple-600"></i>
-                </div>
-                <h2 class="text-lg font-semibold text-gray-900">Role & Bagian</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Role -->
-                <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
-                        Peran (Role) <span class="text-red-500">*</span>
-                    </label>
-                    <select name="role" 
-                            id="role" 
-                            required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('role') border-red-500 @enderror">
-                        <option value="">-- Pilih Role --</option>
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>
-                            🛡️ Administrator
-                        </option>
-                        <option value="pegawai" {{ old('role') == 'pegawai' ? 'selected' : '' }}>
-                            👤 Pegawai
-                        </option>
-                        <option value="pimpinan" {{ old('role') == 'pimpinan' ? 'selected' : '' }}>
-                            👑 Pimpinan
-                        </option>
-                    </select>
-                    @error('role')
-                        <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
-
-                <!-- Department -->
-                <div>
-                    <label for="bagian" class="block text-sm font-medium text-gray-700 mb-2">
-                        Bagian/Subbagian
-                    </label>
-                    <select name="bagian" 
-                            id="bagian"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('bagian') border-red-500 @enderror">
-                        <option value="">-- Pilih Bagian --</option>
-                        <optgroup label="Bagian Sekretariat">
-                            <option value="Sub Bagian Umum dan Kepegawaian" {{ old('bagian') == 'Sub Bagian Umum dan Kepegawaian' ? 'selected' : '' }}>
-                                Sub Bagian Umum dan Kepegawaian
-                            </option>
-                            <option value="Substansi Keuangan dan Aset" {{ old('bagian') == 'Substansi Keuangan dan Aset' ? 'selected' : '' }}>
-                                Substansi Keuangan dan Aset
-                            </option>
-                            <option value="Substansi Perencanaan" {{ old('bagian') == 'Substansi Perencanaan' ? 'selected' : '' }}>
-                                Substansi Perencanaan
-                            </option>
-                        </optgroup>
-                        <optgroup label="Bidang Operasional">
-                            <option value="Penempatan dan Perluasan Kesempatan Kerja" {{ old('bagian') == 'Penempatan dan Perluasan Kesempatan Kerja' ? 'selected' : '' }}>
-                                Penempatan dan Perluasan Kesempatan Kerja
-                            </option>
-                            <option value="Pelatihan dan Produktivitas Tenaga Kerja" {{ old('bagian') == 'Pelatihan dan Produktivitas Tenaga Kerja' ? 'selected' : '' }}>
-                                Pelatihan dan Produktivitas Tenaga Kerja
-                            </option>
-                            <option value="Bidang Pengawasan Ketenagakerjaan" {{ old('bagian') == 'Bidang Pengawasan Ketenagakerjaan' ? 'selected' : '' }}>
-                                Bidang Pengawasan Ketenagakerjaan
-                            </option>
-                            <option value="Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja" {{ old('bagian') == 'Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja' ? 'selected' : '' }}>
-                                Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja
-                            </option>
-                        </optgroup>
-                    </select>
-                    @error('bagian')
-                        <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
-            </div>
-        </div>
-
-        <!-- Security Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center gap-3 mb-6 pb-3 border-b border-gray-100">
                 <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-lock text-orange-600"></i>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-900">Keamanan Akun</h2>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">3. Keamanan Akun</h2>
+                    <p class="text-xs text-gray-500">Kata sandi masuk ke aplikasi SIDORA</p>
+                </div>
             </div>
 
             <div class="max-w-md">
@@ -229,20 +222,20 @@
                         Password <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
-                        <input type="password" 
+                        <input :type="showPassword ? 'text' : 'password'" 
                                name="password" 
                                id="password" 
                                required
                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 @error('password') border-red-500 @enderror"
                                placeholder="Masukkan password">
                         <button type="button" 
-                                onclick="togglePassword()"
-                                class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <i class="fas fa-eye text-gray-400 hover:text-gray-600" id="toggleIcon"></i>
+                                @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                         </button>
                     </div>
                     <p class="text-gray-500 text-xs mt-1">
-                        Password minimal 8 karakter, kombinasi huruf dan angka
+                        Password minimal 6 karakter
                     </p>
                     @error('password')
                         <p class="text-red-500 text-sm mt-1 flex items-center gap-1">
@@ -256,7 +249,7 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end gap-4">
-            <a href="{{ route('users.index') }}" 
+            <a href="{{ route('admin.users.index') }}" 
                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Kembali
@@ -272,25 +265,109 @@
 </div>
 
 <script>
-function togglePassword() {
-    const passwordInput = document.getElementById('password');
-    const toggleIcon = document.getElementById('toggleIcon');
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.classList.remove('fa-eye');
-        toggleIcon.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        toggleIcon.classList.remove('fa-eye-slash');
-        toggleIcon.classList.add('fa-eye');
-    }
+function userForm() {
+    const dataStruktur = {
+        admin: [
+            { value: 'Sub Bagian Umum dan Kepegawaian', label: 'Sub Bagian Umum dan Kepegawaian', defaultPos: 'Kasubbag Umum dan Kepegawaian' }
+        ],
+        pimpinan: [
+            // Pimpinan Utama & Sekretariat
+            { value: 'Kepala Dinas Tenaga Kerja', label: 'Kepala Dinas Tenaga Kerja', defaultPos: 'Kepala Dinas' },
+            { value: 'Sekretariat', label: 'Sekretaris Dinas (Kepala Sekretariat)', defaultPos: 'Sekretaris Dinas' },
+            { value: 'Sub Bagian Umum dan Kepegawaian', label: 'Sub Bagian Umum dan Kepegawaian (Kasubbag)', defaultPos: 'Kasubbag Umum dan Kepegawaian' },
+            { value: 'Staf Perencana Sekretariat', label: 'Kepala Staf Perencana', defaultPos: 'Kepala Staf Perencana' },
+            { value: 'Keuangan dan Aset Sekretariat', label: 'Kepala Staf Keuangan', defaultPos: 'Kepala Staf Keuangan' },
+            { value: 'Kepegawaian Sekretariat', label: 'Kepala Staf Kepegawaian', defaultPos: 'Kepala Staf Kepegawaian' },
+            
+            // Kepala Bidang (Kabid)
+            { value: 'Bidang Penempatan dan Perluasan Kesempatan Kerja', label: 'Kepala Bidang Penempatan dan Perluasan Kesempatan Kerja', defaultPos: 'Kepala Bidang Penempatan dan Perluasan Kesempatan Kerja' },
+            { value: 'Bidang Pelatihan dan Produktivitas Tenaga Kerja', label: 'Kepala Bidang Pelatihan dan Produktivitas Tenaga Kerja', defaultPos: 'Kepala Bidang Pelatihan dan Produktivitas Tenaga Kerja' },
+            { value: 'Bidang Pengawasan Ketenagakerjaan', label: 'Kepala Bidang Pengawasan Ketenagakerjaan', defaultPos: 'Kepala Bidang Pengawasan Ketenagakerjaan' },
+            { value: 'Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja', label: 'Kepala Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja', defaultPos: 'Kepala Bidang Hubungan Industrial dan Perlindungan Tenaga Kerja' },
+            
+            // Kepala UPTD
+            { value: 'UPTD BLK Bandar Lampung', label: 'Kepala UPTD BLK Bandar Lampung', defaultPos: 'Kepala UPTD BLK Bandar Lampung' },
+            { value: 'UPTD BLK Metro', label: 'Kepala UPTD BLK Metro', defaultPos: 'Kepala UPTD BLK Metro' },
+            { value: 'UPTD BLK Kalianda', label: 'Kepala UPTD BLK Kalianda', defaultPos: 'Kepala UPTD BLK Kalianda' },
+            { value: 'UPTD BLK Way Abung', label: 'Kepala UPTD BLK Way Abung', defaultPos: 'Kepala UPTD BLK Way Abung' },
+            { value: 'UPTD Balai Pengembangan Produktivitas Daerah', label: 'Kepala UPTD Balai Pengembangan Produktivitas Daerah', defaultPos: 'Kepala UPTD Balai Pengembangan Produktivitas Daerah' },
+            { value: 'UPTD Balai Keselamatan dan Kesehatan Kerja', label: 'Kepala UPTD Balai Keselamatan dan Kesehatan Kerja (K3)', defaultPos: 'Kepala UPTD Balai Keselamatan dan Kesehatan Kerja' }
+        ],
+        pegawai: [
+            // Staf Langsung Sekretariat
+            { value: 'Sub Bagian Umum dan Kepegawaian', label: 'Staf Subbag Umum dan Kepegawaian', defaultPos: 'Staf Subbag Umum dan Kepegawaian' },
+            { value: 'Staf Perencana Sekretariat', label: 'Staf Perencana', defaultPos: 'Staf Perencana' },
+            { value: 'Keuangan dan Aset Sekretariat', label: 'Staf Keuangan dan Aset', defaultPos: 'Staf Keuangan dan Aset' },
+            { value: 'Kepegawaian Sekretariat', label: 'Staf Kepegawaian', defaultPos: 'Staf Kepegawaian' },
+
+            // Seksi Bidang Penempatan & Perluasan
+            { value: 'Seksi Penempatan Tenaga Kerja Dalam Negeri', label: 'Seksi Penempatan Tenaga Kerja Dalam Negeri', defaultPos: 'Seksi Penempatan Tenaga Kerja Dalam Negeri' },
+            { value: 'Seksi Pengembangan Informasi Pasar Kerja', label: 'Seksi Pengembangan Informasi Pasar Kerja', defaultPos: 'Seksi Pengembangan Informasi Pasar Kerja' },
+
+            // Seksi Bidang Pelatihan & Produktivitas
+            { value: 'Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja', label: 'Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja', defaultPos: 'Seksi Pembinaan Lembaga Pelatihan Tenaga Kerja' },
+            { value: 'Seksi Pengembangan Produktivitas Tenaga Kerja', label: 'Seksi Pengembangan Produktivitas Tenaga Kerja', defaultPos: 'Seksi Pengembangan Produktivitas Tenaga Kerja' },
+
+            // Seksi Bidang Pengawasan Ketenagakerjaan
+            { value: 'Seksi Pengawasan Norma Kerja, Jamsostek, Pekerja Perempuan dan Anak', label: 'Seksi Pengawasan Norma Kerja, Jamsostek, Perempuan & Anak', defaultPos: 'Seksi Pengawasan Norma Kerja, Jamsostek, Pekerja Perempuan dan Anak' },
+            { value: 'Seksi Penegakan Hukum dan Penindakan', label: 'Seksi Penegakan Hukum dan Penindakan', defaultPos: 'Seksi Penegakan Hukum dan Penindakan' },
+
+            // Seksi Bidang Hubungan Industrial & Perlindungan
+            { value: 'Seksi Pembinaan Organisasi Pekerja, Pengusaha dan Lembaga HI', label: 'Seksi Pembinaan Organisasi Pekerja, Pengusaha & Lembaga HI', defaultPos: 'Seksi Pembinaan Organisasi Pekerja, Pengusaha dan Lembaga HI' },
+            { value: 'Seksi Pembinaan Syarat Kerja dan Jamsostek', label: 'Seksi Pembinaan Syarat Kerja dan Jamsostek', defaultPos: 'Seksi Pembinaan Syarat Kerja dan Jamsostek' },
+
+            // Subbag Tata Usaha UPTD
+            { value: 'Subbag Tata Usaha BLK Bandar Lampung', label: 'Subbag Tata Usaha BLK Bandar Lampung', defaultPos: 'Subbag Tata Usaha BLK Bandar Lampung' },
+            { value: 'Subbag Tata Usaha BLK Metro', label: 'Subbag Tata Usaha BLK Metro', defaultPos: 'Subbag Tata Usaha BLK Metro' },
+            { value: 'Subbag Tata Usaha BLK Kalianda', label: 'Subbag Tata Usaha BLK Kalianda', defaultPos: 'Subbag Tata Usaha BLK Kalianda' },
+            { value: 'Subbag Tata Usaha BLK Way Abung', label: 'Subbag Tata Usaha BLK Way Abung', defaultPos: 'Subbag Tata Usaha BLK Way Abung' },
+            { value: 'Subbag Tata Usaha Balai Pengembangan Produktivitas Daerah', label: 'Subbag Tata Usaha Balai Pengembangan Produktivitas Daerah', defaultPos: 'Subbag Tata Usaha Balai Pengembangan Produktivitas Daerah' },
+            { value: 'Subbag Tata Usaha Balai Keselamatan dan Kesehatan Kerja', label: 'Subbag Tata Usaha Balai Keselamatan dan Kesehatan Kerja (K3)', defaultPos: 'Subbag Tata Usaha Balai Keselamatan dan Kesehatan Kerja' }
+        ]
+    };
+
+    return {
+        selectedRole: '{{ old('role', '') }}',
+        selectedBagian: '{{ old('bagian', '') }}',
+        selectedPosition: '{{ old('position', '') }}',
+        showPassword: false,
+        currentBagianOptions: [],
+
+        init() {
+            if (this.selectedRole) {
+                this.updateOptions();
+            }
+        },
+
+        onRoleChange() {
+            this.selectedBagian = '';
+            this.updateOptions();
+
+            // Khusus admin, langsung otomatis set ke Sub Bagian Umum dan Kepegawaian
+            if (this.selectedRole === 'admin') {
+                this.selectedBagian = 'Sub Bagian Umum dan Kepegawaian';
+                if (!this.selectedPosition) {
+                    this.selectedPosition = 'Kasubbag Umum dan Kepegawaian';
+                }
+            }
+        },
+
+        onBagianChange() {
+            // Otomatis isi jabatan resmi sesuai bagian/subbagian yang dipilih
+            const currentItem = this.currentBagianOptions.find(item => item.value === this.selectedBagian);
+            if (currentItem && currentItem.defaultPos) {
+                this.selectedPosition = currentItem.defaultPos;
+            }
+        },
+
+        updateOptions() {
+            if (this.selectedRole && dataStruktur[this.selectedRole]) {
+                this.currentBagianOptions = dataStruktur[this.selectedRole];
+            } else {
+                this.currentBagianOptions = [];
+            }
+        }
+    };
 }
 </script>
-
-<style>
-    .shadow-custom {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-</style>
 @endsection

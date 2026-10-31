@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('surats', function (Blueprint $table) {
-            $table->string('logo_instansi')->nullable();
-            $table->string('nama_instansi')->nullable();
-            $table->string('alamat_instansi')->nullable();
-            $table->string('kontak_instansi')->nullable();
+        Schema::table('surat_penandatangan', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable()->change();
         });
-
     }
 
     /**
@@ -25,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('surats', function (Blueprint $table) {
-            //
+        Schema::table('surat_penandatangan', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable(false)->change();
         });
     }
 };

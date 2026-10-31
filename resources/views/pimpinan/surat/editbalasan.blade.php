@@ -52,19 +52,49 @@
                     <label for="tujuan" class="block text-sm font-medium text-gray-700 mb-1">Tujuan Surat</label>
                     <input type="text" name="tujuan" id="tujuan" 
                            value="{{ old('tujuan', $surat->tujuan) }}"
+                           placeholder="Contoh: Pimpinan PT. Tenaga Kerja Sejahtera"
                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5" required>
+                    <p class="text-xs text-gray-500 mt-1.5"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Format tujuan pada cetakan dokumen resmi otomatis diikuti baris <strong>di - tempat</strong>.</p>
                 </div>
 
                 <div class="mb-6">
-                    <label for="isi" class="block text-sm font-medium text-gray-700 mb-1">Isi Surat</label>
-                    <textarea name="isi" id="isi" rows="10"
-                              class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5"
-                              required>{{ old('isi', strip_tags($surat->isi)) }}</textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Isi Surat <span class="text-red-500">*</span></label>
+                    <div id="editor_isi" class="min-h-[220px] bg-white">{!! old('isi', $surat->isi) !!}</div>
+                    <input type="hidden" name="isi" id="isi_hidden" value="{{ old('isi', $surat->isi) }}">
+
+                    {{-- Tips Format & Tab Word --}}
+                    <div class="mt-3 p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-gray-700 space-y-2">
+                        <div class="font-bold text-blue-900 flex items-center gap-2">
+                            <i class="fas fa-keyboard text-blue-600 text-sm"></i>
+                            <span>Panduan Mengetik & Format Dokumen (Seperti di Word):</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-gray-600">
+                            <div class="flex items-start gap-1.5 bg-white/70 p-2 rounded-lg border border-blue-100">
+                                <i class="fas fa-align-left text-blue-500 mt-0.5"></i>
+                                <div>
+                                    <strong class="text-gray-800">Perataan Teks:</strong> Klik ikon rata kiri, tengah, kanan, atau rata kiri-kanan (justify) langsung di toolbar atas.
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-1.5 bg-white/70 p-2 rounded-lg border border-blue-100">
+                                <i class="fas fa-indent text-blue-500 mt-0.5"></i>
+                                <div>
+                                    <strong class="text-gray-800">Tab & Indentasi:</strong> Tekan <kbd class="px-1 py-0.5 bg-white border border-gray-300 rounded font-mono font-semibold">Tab</kbd> untuk menjorokkan paragraf/poin, atau <kbd class="px-1 py-0.5 bg-white border border-gray-300 rounded font-mono font-semibold">Shift+Tab</kbd> untuk memundurkan.
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-1.5 bg-white/70 p-2 rounded-lg border border-blue-100 md:col-span-2">
+                                <i class="fas fa-list-ol text-blue-500 mt-0.5"></i>
+                                <div>
+                                    <strong class="text-gray-800">Cara Keluar dari Poin (Paragraf Bebas):</strong> Pada baris kosong setelah poin terakhir, tekan <kbd class="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono font-bold text-gray-800">Enter 1x lagi</kbd> (total Enter 2x), ATAU klik kembali tombol <strong>Poin/Angka</strong> di toolbar untuk menonaktifkannya. Paragraf baru akan berdiri sendiri dan memiliki jarak pemisah yang rapi.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end space-x-4">
-                    <a href="{{ route('pimpinan.status-surat') }}" 
-                       class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                    <a href="{{ url()->previous() != url()->current() ? url()->previous() : route('pimpinan.status-surat') }}" 
+                       onclick="if (window.history.length > 1) { event.preventDefault(); window.history.back(); }"
+                       class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition cursor-pointer flex items-center">
                         Batal
                     </a>
                     <button type="submit" 
@@ -79,6 +109,14 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.initCkeditor) {
+            window.initCkeditor('#editor_isi', '#isi_hidden');
+        }
+    });
+</script>
 
 <style>
     @keyframes fade-in {

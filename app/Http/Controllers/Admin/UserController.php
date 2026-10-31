@@ -14,7 +14,36 @@ class UserController extends Controller
     public function dashboard()
     {
         $users = User::all();
-        return view('admin.dashboard', compact('users'));
+        $totalUsers = $users->count();
+        $countAdmin = $users->where('role', 'admin')->count();
+        $countPegawai = $users->where('role', 'pegawai')->count();
+        $countPimpinan = $users->where('role', 'pimpinan')->count();
+
+        $totalSuratMasuk = Surat::where('jenis', 'masuk')->count();
+        $totalSuratKeluar = Surat::whereIn('jenis', ['keluar', 'keluar_full'])->count();
+        $suratBelumDisposisi = Surat::where('jenis', 'masuk')
+            ->where(function($q) {
+                $q->whereNull('disposisi_user_id')
+                  ->orWhere('status', 'draft');
+            })
+            ->count();
+
+        $suratMasukTerbaru = Surat::where('jenis', 'masuk')
+            ->latest()
+            ->take(6)
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'users',
+            'totalUsers',
+            'countAdmin',
+            'countPegawai',
+            'countPimpinan',
+            'totalSuratMasuk',
+            'totalSuratKeluar',
+            'suratBelumDisposisi',
+            'suratMasukTerbaru'
+        ));
     }
 
     // Daftar Pengguna
@@ -53,7 +82,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Pengguna berhasil ditambahkan.');
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil ditambahkan.');
     }
 
     // Form Edit
@@ -89,16 +118,46 @@ class UserController extends Controller
     // Hapus Pengguna
     public function destroy(User $user)
     {
+        // Tidak bisa hapus diri sendiri
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Tidak dapat menghapus akun Anda sendiri.');
+        }
         $user->delete();
         return back()->with('success', 'Pengguna berhasil dihapus.');
     }
 
+    // Hapus Banyak Pengguna Sekaligus (Bulk Delete)
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $ids = array_filter($request->ids, fn($id) => (int)$id !== auth()->id());
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada pengguna yang dapat dihapus (Anda tidak dapat menghapus akun sendiri).');
+        }
+
+        $count = User::whereIn('id', $ids)->count();
+        User::whereIn('id', $ids)->delete();
+
+        return back()->with('success', "{$count} pengguna berhasil dihapus.");
+    }
+
     public function laporan()
     {
-        $surats = Surat::whereHas('user', function($query) {
-            $query->where('role', 'pegawai');
-        })->with('user')->latest()->get();
+        // Surat yang sudah disetujui sepenuhnya (baik dari pegawai maupun pimpinan) masuk ke admin untuk penomoran resmi
+        $surats = Surat::where('status', 'disetujui')
+          ->whereIn('jenis', ['keluar', 'keluar_full', 'balasan'])
+          ->with(['user', 'penandatangans', 'pengirim'])
+          ->latest()
+          ->get();
         
-        return view('admin.laporan.index', compact('surats'));
+        $nextNomorUrut = \App\Http\Controllers\Admin\SuratController::getNextNomorUrut(date('Y'));
+        $klasifikasiList = \App\Http\Controllers\Admin\SuratController::getKlasifikasiArsip();
+
+        return view('admin.laporan.index', compact('surats', 'nextNomorUrut', 'klasifikasiList'));
     }
 }

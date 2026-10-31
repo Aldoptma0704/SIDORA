@@ -1,14 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="{ 
-    showModal: false, 
-    showSearch: false,
-    searchTerm: '',
-    selectedItems: [],
-    selectAll: false,
-    showDeleteConfirm: false
-}" class="space-y-6">
+<div x-data="statusSuratPegawai()" class="space-y-6">
 
     {{-- Success Notification --}}
     @if (session('success'))
@@ -96,9 +89,9 @@
                     Ajukan Permohonan
                 </button>
                 
-                <button x-show="selectedItems.length > 0" @click="showDeleteConfirm = true" class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200">
+                <button x-show="selectedItems.length > 0" @click="showDeleteBulkConfirm = true" type="button" class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold rounded-lg shadow-md hover:from-red-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200" x-cloak>
                     <i class="fas fa-trash mr-2"></i>
-                    Hapus Terpilih
+                    Hapus Terpilih (<span x-text="selectedItems.length"></span>)
                 </button>
             </div>
         </div>
@@ -129,7 +122,7 @@
                                 <div class="ml-4 flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="text-lg font-semibold text-gray-900 group-hover:text-blue-900">{{ $draft->judul }}</span>
-                                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ $draft->created_at->format('d M Y') }}</span>
+                                        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ $draft->created_at ? $draft->created_at->locale('id')->translatedFormat('d F Y') : '-' }}</span>
                                     </div>
                                     <p class="text-sm text-gray-600 mt-1">Jenis: {{ str_replace('_', ' ', ucfirst($draft->jenis ?? 'Umum')) }}</p>
                                 </div>
@@ -157,20 +150,41 @@
         </div>
     </div>
 
-    {{-- Delete Confirmation Modal --}}
-    <div x-show="showDeleteConfirm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
-        <div @click.away="showDeleteConfirm = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+    {{-- Bulk Delete Confirmation Modal --}}
+    <div x-show="showDeleteBulkConfirm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+        <div @click.away="showDeleteBulkConfirm = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 rounded-full mb-4">
                     <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
                 </div>
                 <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Konfirmasi Penghapusan</h3>
-                <p class="text-center text-gray-600 mb-6">Apakah Anda yakin ingin menghapus surat yang dipilih? Tindakan ini tidak dapat dibatalkan.</p>
+                <p class="text-center text-gray-600 mb-6">Apakah Anda yakin ingin menghapus <span class="font-bold text-red-600" x-text="selectedItems.length"></span> surat yang dipilih? Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex gap-3">
-                    <button @click="showDeleteConfirm = false" class="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all duration-200">
+                    <button @click="showDeleteBulkConfirm = false" class="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all duration-200">
                         Batal
                     </button>
-                    <button @click="document.getElementById('bulkDeleteForm').submit()" class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">
+                    <button @click="submitBulkDelete()" class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">
+                        Hapus Semua
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Single Delete Confirmation Modal --}}
+    <div x-show="showDeleteSingleConfirm" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" x-cloak>
+        <div @click.away="showDeleteSingleConfirm = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 rounded-full mb-4">
+                    <i class="fas fa-trash-alt text-2xl text-red-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Hapus Surat Ini?</h3>
+                <p class="text-center text-gray-600 mb-6">Apakah Anda yakin ingin menghapus surat ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-3">
+                    <button @click="showDeleteSingleConfirm = false" class="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all duration-200">
+                        Batal
+                    </button>
+                    <button @click="submitSingleDelete()" class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">
                         Hapus
                     </button>
                 </div>
@@ -178,89 +192,105 @@
         </div>
     </div>
 
+    {{-- Standalone Bulk Delete Form --}}
+    <form action="{{ route('pegawai.surat.bulk-delete') }}" method="POST" id="bulkDeleteForm">
+        @csrf
+        @method('DELETE')
+        <template x-for="id in selectedItems" :key="id">
+            <input type="hidden" name="ids[]" :value="id">
+        </template>
+    </form>
+
     {{-- Enhanced Table --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <form action="{{ route('pegawai.surat.bulk-delete') }}" method="POST" id="bulkDeleteForm">
-            @csrf
-            @method('DELETE')
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                        <tr>
-                            <th class="px-6 py-4 text-left">
-                                <input type="checkbox" @change="selectAll = !selectAll; selectedItems = selectAll ? Array.from(document.querySelectorAll('.surat-checkbox')).map(cb => cb.value) : []" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Judul Surat</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jenis Surat</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($surats as $index => $surat)
-                            <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group">
-                                <td class="px-6 py-4">
-                                    @if ($surat->status !== 'menunggu')
-                                        <input type="checkbox" name="ids[]" value="{{ $surat->id }}"
-                                            class="surat-checkbox h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            @change="selectedItems = Array.from(document.querySelectorAll('.surat-checkbox:checked')).map(cb => cb.value)">
-                                    @endif
-                                </td>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 text-left">
+                            <input type="checkbox" @change="toggleSelectAll()" :checked="selectAll" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Judul Surat</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jenis Surat</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse ($surats as $index => $surat)
+                        <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group">
+                            <td class="px-6 py-4">
+                                @if ($surat->status !== 'menunggu')
+                                    <input type="checkbox" value="{{ $surat->id }}"
+                                        class="surat-checkbox h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        :checked="selectedItems.includes('{{ $surat->id }}')"
+                                        @change="updateSelection()">
+                                @else
+                                    <span class="text-gray-300">—</span>
+                                @endif
+                            </td>
 
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-900">{{ $surat->judul }}</div>
-                                    <div class="text-xs text-gray-500 mt-1">ID: #{{ $surat->id }}</div>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-600">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        {{ str_replace('_', ' ', ucfirst($surat->jenis)) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @php
-                                        $statusConfig = match($surat->status) {
-                                            'disetujui' => ['bg-green-100 text-green-800', 'fas fa-check-circle', 'Disetujui'],
-                                            'ditolak' => ['bg-red-100 text-red-800', 'fas fa-times-circle', 'Ditolak'],
-                                            default => ['bg-yellow-100 text-yellow-800', 'fas fa-clock', 'Menunggu']
-                                        };
-                                    @endphp
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $statusConfig[0] }}">
-                                        <i class="{{ $statusConfig[1] }} mr-1"></i>
-                                        {{ $statusConfig[2] }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-600">
-                                    <div>{{ $surat->created_at->format('d M Y') }}</div>
-                                    <div class="text-xs text-gray-400">{{ $surat->created_at->format('H:i') }}</div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('pegawai.surat.preview', ['id' => $surat->id, 'view' => 'status']) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200">
-                                            <i class="fas fa-eye mr-1"></i>
-                                            Lihat
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-16 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
-                                        <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data surat</h3>
-                                        <p class="text-sm text-gray-500">Belum ada surat yang diajukan. Mulai dengan mengajukan permohonan surat baru.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </form>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $index + 1 }}</td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-900">{{ $surat->judul }}</div>
+                                <div class="text-xs text-gray-500 mt-1">ID: #{{ $surat->id }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ str_replace('_', ' ', ucfirst($surat->jenis)) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @php
+                                    $statusConfig = match($surat->status) {
+                                        'disetujui' => ['bg-green-100 text-green-800', 'fas fa-check-circle', 'Disetujui'],
+                                        'ditolak' => ['bg-red-100 text-red-800', 'fas fa-times-circle', 'Ditolak'],
+                                        default => ['bg-yellow-100 text-yellow-800', 'fas fa-clock', 'Menunggu']
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $statusConfig[0] }}">
+                                    <i class="{{ $statusConfig[1] }} mr-1"></i>
+                                    {{ $statusConfig[2] }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                <div class="font-medium text-gray-800">{{ $surat->created_at ? $surat->created_at->locale('id')->translatedFormat('d F Y') : '-' }}</div>
+                                <div class="text-xs text-gray-400">{{ $surat->created_at ? $surat->created_at->format('H:i') . ' WIB' : '' }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <a href="{{ route('pegawai.surat.preview', ['id' => $surat->id, 'view' => 'status']) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Lihat
+                                    </a>
+                                    @if ($surat->status !== 'menunggu')
+                                        <form action="{{ route('pegawai.surat.destroy', $surat->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" @click="confirmSingleDelete($el.closest('form'))" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200" title="Hapus Surat">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-16 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data surat</h3>
+                                    <p class="text-sm text-gray-500">Belum ada surat yang diajukan. Mulai dengan mengajukan permohonan surat baru.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {{-- Pagination (if needed) --}}
@@ -273,6 +303,55 @@
 
 @push('scripts')
 <script>
+    function statusSuratPegawai() {
+        return {
+            showModal: false,
+            showSearch: false,
+            searchTerm: '',
+            selectedItems: [],
+            selectAll: false,
+            showDeleteBulkConfirm: false,
+            showDeleteSingleConfirm: false,
+            deleteSingleForm: null,
+            toggleSelectAll() {
+                this.selectAll = !this.selectAll;
+                const checkboxes = document.querySelectorAll('.surat-checkbox');
+                if (this.selectAll) {
+                    this.selectedItems = Array.from(checkboxes).map(function(cb) { return cb.value; });
+                    checkboxes.forEach(function(cb) { cb.checked = true; });
+                } else {
+                    this.selectedItems = [];
+                    checkboxes.forEach(function(cb) { cb.checked = false; });
+                }
+            },
+            updateSelection() {
+                const checked = document.querySelectorAll('.surat-checkbox:checked');
+                const all = document.querySelectorAll('.surat-checkbox');
+                this.selectedItems = Array.from(checked).map(function(cb) { return cb.value; });
+                this.selectAll = (all.length > 0 && checked.length === all.length);
+            },
+            confirmSingleDelete(formEl) {
+                this.deleteSingleForm = formEl;
+                this.showDeleteSingleConfirm = true;
+            },
+            submitSingleDelete() {
+                if (this.deleteSingleForm) this.deleteSingleForm.submit();
+            },
+            submitBulkDelete() {
+                const form = document.getElementById('bulkDeleteForm');
+                form.querySelectorAll('input[name="ids[]"]').forEach(function(el) { el.remove(); });
+                this.selectedItems.forEach(function(id) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'ids[]';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+                form.submit();
+            }
+        };
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             const alerts = document.querySelectorAll('[x-data*="show: true"]');
@@ -282,27 +361,6 @@
                 }
             });
         }, 5000);
-
-        const selectAllCheckbox = document.querySelector('input[type="checkbox"]:not(.surat-checkbox)');
-        const itemCheckboxes = document.querySelectorAll('.surat-checkbox');
-        
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', function() {
-                itemCheckboxes.forEach(checkbox => {
-                    checkbox.checked = this.checked;
-                });
-            });
-        }
-
-        itemCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const checkedCount = document.querySelectorAll('.surat-checkbox:checked').length;
-                if (selectAllCheckbox) {
-                    selectAllCheckbox.checked = checkedCount === itemCheckboxes.length;
-                    selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < itemCheckboxes.length;
-                }
-            });
-        });
     });
 </script>
 @endpush

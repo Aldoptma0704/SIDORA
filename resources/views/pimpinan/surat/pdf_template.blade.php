@@ -6,13 +6,20 @@
     <style>
         /* CSS khusus untuk DomPDF */
         @page {
-            margin: 20mm; /* Atur margin halaman A4 */
+            margin-top: 1.2cm;
+            margin-bottom: 1.2cm;
+            margin-left: 2cm;
+            margin-right: 1.8cm;
         }
         body {
-            font-family: 'Arial', sans-serif;
-            font-size: 10pt;
-            line-height: 1.5;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.25;
             color: #000000;
+        }
+        p {
+            margin: 0 0 3px 0;
+            line-height: 1.25;
         }
         table {
             width: 100%;
@@ -22,76 +29,102 @@
             vertical-align: top;
         }
         .header-section, .info-section, .signature-section {
-            page-break-inside: avoid; /* Hindari pemisahan halaman di dalam bagian ini */
+            page-break-inside: avoid;
         }
         .header-logo-container {
-            width: 15%;
+            width: 70px;
             text-align: left;
             vertical-align: middle;
-            padding-right: 15px;
+            padding-right: 10px;
         }
         .header-text-container {
-            width: 85%;
             text-align: center;
             vertical-align: middle;
         }
         .header-text h1 {
-            font-size: 14pt;
+            font-size: 13.5pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin: 0 0 4px 0;
+            margin: 0 0 2px 0;
+            line-height: 1.15;
         }
         .header-text h2 {
-            font-size: 12pt;
-            font-weight: 600;
+            font-size: 12.5pt;
+            font-weight: bold;
             text-transform: uppercase;
-            margin: 0 0 4px 0;
+            margin: 0 0 2px 0;
+            line-height: 1.15;
         }
         .header-text p {
-            font-size: 9pt;
+            font-size: 8.5pt;
             margin: 0;
+            line-height: 1.2;
         }
         .hr-line {
-            border-top: 3px solid black;
-            margin-top: 16px;
-            margin-bottom: 16px;
+            border-top: 2.5px solid black;
+            border-bottom: 0.8px solid black;
+            height: 1.5px;
+            margin-top: 4px;
+            margin-bottom: 10px;
         }
         .letter-info td {
-            padding-right: 8px;
+            padding: 1px 4px 1px 0;
             white-space: nowrap;
         }
         .signature-block {
-            margin-top: 40px;
-            text-align: right; /* Keeps the entire block on the right */
+            margin-top: 16px;
+            text-align: right;
         }
-        .signature-content { /* New class for the content within the signature block */
-            display: inline-block; /* Allows content to respect text-align of parent, but its own children can be left-aligned */
-            text-align: left; /* Aligns content inside this div to the left */
-            margin-left: 350px; /* Adjust this value to move it further right */
+        .signature-content {
+            display: inline-block;
+            text-align: left;
+            margin-left: 320px;
         }
         .signature-block p {
-            margin: 0;
+            margin: 0 0 2px 0;
         }
         .signature-image {
-            height: 80px;
-            width: 150px;
+            max-height: 50px;
+            max-width: 140px;
             display: block;
-            margin-left: 0; /* Align image to the left within its container */
-            margin-right: auto; /* Align image to the left within its container */
+            margin-left: 0;
+            margin-right: auto;
         }
 
-        p {
-            margin: 0 0 6px 0; /* bawah 6px saja, atas 0px */
-            line-height: 1.4; /* biar tetap enak dibaca */
-        }
-
-        /* Gaya untuk konten dari Quill editor */
+        /* Gaya untuk konten dari Editor */
         .ql-editor p {
-            margin-bottom: 1em;
+            margin: 0 0 6px 0;
+            line-height: 1.35;
         }
-        .ql-editor ol, .ql-editor ul {
-            margin-left: 1.5em;
-            margin-bottom: 1em;
+        .text-align-left, .ql-align-left, .ck-align-left, [style*="text-align: left"], [style*="text-align:left"] { text-align: left !important; }
+        .text-align-center, .ql-align-center, .ck-align-center, [style*="text-align: center"], [style*="text-align:center"] { text-align: center !important; }
+        .text-align-right, .ql-align-right, .ck-align-right, [style*="text-align: right"], [style*="text-align:right"] { text-align: right !important; }
+        .text-align-justify, .ql-align-justify, .ck-align-justify, [style*="text-align: justify"], [style*="text-align:justify"] { text-align: justify !important; }
+
+        .ck-indent-1, .ql-indent-1 { margin-left: 20px !important; }
+        .ck-indent-2, .ql-indent-2 { margin-left: 40px !important; }
+        .ck-indent-3, .ql-indent-3 { margin-left: 60px !important; }
+        .ck-indent-4, .ql-indent-4 { margin-left: 80px !important; }
+
+        .ql-editor ol {
+            list-style-type: decimal;
+            margin-top: 4px;
+            margin-bottom: 6px;
+            padding-left: 24px;
+        }
+        .ql-editor ul {
+            list-style-type: disc;
+            margin-top: 4px;
+            margin-bottom: 6px;
+            padding-left: 24px;
+        }
+        .ql-editor li {
+            margin-bottom: 3px;
+            line-height: 1.35;
+        }
+        .ql-editor ol + p, .ql-editor ul + p {
+            margin-top: 12px !important;
+            clear: both;
         }
     </style>
 </head>
@@ -170,7 +203,7 @@
 
         <p style="margin-bottom: 8px;">Kepada Yth.</p>
         <p style="margin-bottom: 8px;">{{ $surat->tujuan ?? '........................................' }}</p>
-        <p style="margin-bottom: 16px;">di Tempat</p>
+        <p style="margin-bottom: 16px;">di - tempat</p>
 
         <p style="margin-bottom: 16px;">Dengan hormat,</p>
         <div class="ql-editor p-0" style="margin-bottom: 16px;">{!! $surat->isi !!}</div>

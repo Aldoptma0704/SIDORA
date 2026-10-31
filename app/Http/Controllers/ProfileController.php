@@ -46,9 +46,30 @@ class ProfileController extends Controller
             $user->save();
         }
 
-        if ($request->hasFile('profile_photo')) {
+        // Handle Foto Profil: baik via Cropped Base64 atau File Upload langsung
+        if ($request->filled('cropped_profile_photo')) {
+            $data = $request->input('cropped_profile_photo');
+            if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
+                $data = substr($data, strpos($data, ',') + 1);
+                $type = strtolower($type[1]); // jpg, png, jpeg
+                if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                    $type = 'png';
+                }
+                $data = base64_decode($data);
+
+                if ($data !== false) {
+                    if ($user->profile_photo) {
+                        Storage::delete('public/profile_photos/' . $user->profile_photo);
+                    }
+                    $filename = $user->id . '_photo.' . ($type === 'jpeg' ? 'jpg' : $type);
+                    Storage::disk('public')->put('profile_photos/' . $filename, $data);
+                    $user->profile_photo = $filename;
+                    $user->save();
+                }
+            }
+        } elseif ($request->hasFile('profile_photo')) {
             $request->validate([
-                'profile_photo' => 'image|mimes:png,jpg,jpeg|max:2048',
+                'profile_photo' => 'image|mimes:png,jpg,jpeg|max:5120',
             ]);
 
             if ($user->profile_photo) {

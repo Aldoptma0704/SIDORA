@@ -15,11 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('position')->nullable(); // Jabatan
+            $table->string('nip')->nullable();      // NIP
+            $table->string('signature')->nullable();
+            $table->string('profile_photo')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'pegawai', 'pimpinan']);
+            $table->string('bagian')->nullable();
             $table->rememberToken();
             $table->timestamps();
-            
         });
     }
 

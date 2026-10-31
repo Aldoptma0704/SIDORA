@@ -1,224 +1,210 @@
 @extends('layouts.app')
 
+@section('title', 'Dashboard Administrator - SIDORA')
+
 @section('content')
-<div class="max-w-7xl mx-auto">
-    <!-- Page Header -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-users-cog text-primary-600 text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Kelola Pengguna</h1>
-                    <p class="text-gray-600 mt-1">Mengelola data pengguna sistem SIDORA</p>
-                </div>
-            </div>
-            
-            <a href="{{ route('admin.users.create') }}" 
-               class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
-                <i class="fas fa-user-plus mr-2"></i>
-                Tambah Pengguna
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header Page -->
+    <x-page-header 
+        title="Dashboard Administrator" 
+        description="Ringkasan operasional dokumen dinas, disposisi surat, dan manajemen pengguna SIDORA."
+        icon="fas fa-chart-pie">
+        <x-slot:actions>
+            <a href="{{ route('admin.surat.masuk') }}" 
+               class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+                <i class="fas fa-inbox mr-2"></i>
+                Buka Surat Masuk
             </a>
-        </div>
+            <a href="{{ route('admin.users.index') }}" 
+               class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">
+                <i class="fas fa-users-cog mr-2 text-gray-500"></i>
+                Kelola Pengguna
+            </a>
+        </x-slot:actions>
+    </x-page-header>
+
+    <!-- Empat Kartu Ringkasan -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <x-stat-card 
+            title="Total Surat Masuk" 
+            :value="$totalSuratMasuk" 
+            icon="fas fa-inbox" 
+            color="blue"
+            description="Dokumen dari instansi luar" />
+
+        <x-stat-card 
+            title="Total Surat Keluar" 
+            :value="$totalSuratKeluar" 
+            icon="fas fa-paper-plane" 
+            color="emerald"
+            description="Surat dinas yang diajukan" />
+
+        <x-stat-card 
+            title="Belum Didisposisi" 
+            :value="$suratBelumDisposisi" 
+            icon="fas fa-exclamation-circle" 
+            color="amber"
+            description="Surat masuk menunggu arahan" />
+
+        <x-stat-card 
+            title="Total Pengguna" 
+            :value="$totalUsers" 
+            icon="fas fa-users" 
+            color="slate"
+            description="Akun terdaftar dalam sistem" />
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Total Pengguna</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $users->count() }}</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-users text-blue-600"></i>
-                </div>
-            </div>
+    <!-- Layout Dua Kolom -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Kolom Kiri Lebar: Surat Masuk Terbaru (2 Kolom) -->
+        <div class="lg:col-span-2 space-y-6">
+            <x-card title="Surat Masuk Terbaru" subtitle="Daftar 6 dokumen terakhir yang diterima di sistem SIDORA">
+                <x-slot:headerActions>
+                    <a href="{{ route('admin.surat.masuk') }}" 
+                       class="text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors">
+                        Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </x-slot:headerActions>
+
+                @if($suratMasukTerbaru->isEmpty())
+                    <div class="text-center py-10">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                            <i class="fas fa-inbox text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-700">Belum ada surat masuk</p>
+                        <p class="text-xs text-gray-500 mt-1 mb-4">Catat surat masuk baru yang diterima dari pihak luar instansi.</p>
+                        <a href="{{ route('admin.surat.masuk') }}" 
+                           class="inline-flex items-center px-3.5 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-1.5"></i> Input Surat Masuk
+                        </a>
+                    </div>
+                @else
+                    <div class="overflow-x-auto -mx-5 -my-5 sm:-mx-6 sm:-my-6">
+                        <table class="min-w-full divide-y divide-gray-200 text-xs">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-5 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Instansi Pengirim</th>
+                                    <th class="px-5 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Perihal</th>
+                                    <th class="px-5 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-5 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th class="px-5 py-3 text-right font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach($suratMasukTerbaru as $surat)
+                                    <tr class="hover:bg-gray-50/80 transition-colors">
+                                        <td class="px-5 py-3.5 font-medium text-gray-900 whitespace-nowrap">
+                                            {{ $surat->nama_instansi ?: 'Instansi Luar' }}
+                                        </td>
+                                        <td class="px-5 py-3.5 text-gray-600 max-w-xs truncate" title="{{ $surat->judul }}">
+                                            {{ $surat->judul }}
+                                        </td>
+                                        <td class="px-5 py-3.5 text-gray-500 whitespace-nowrap">
+                                            {{ $surat->created_at ? $surat->created_at->locale('id')->translatedFormat('d M Y') : '-' }}
+                                        </td>
+                                        <td class="px-5 py-3.5 whitespace-nowrap">
+                                            @if($surat->disposisi_user_id)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                    <i class="fas fa-check text-[9px]"></i> Didisposisi
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                                    <i class="fas fa-clock text-[9px]"></i> Belum Disposisi
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                                            <a href="{{ route('admin.surat.masuk.lihat', $surat->id) }}" 
+                                               class="inline-flex items-center px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-[11px] font-medium transition-colors">
+                                                Lihat
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </x-card>
         </div>
 
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Admin</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $users->where('role', 'admin')->count() }}</p>
-                </div>
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-user-shield text-purple-600"></i>
-                </div>
-            </div>
-        </div>
+        <!-- Kolom Kanan Sempit: Panel Pendukung (1 Kolom) -->
+        <div class="space-y-6">
+            <!-- Ringkasan Pengguna Berdasarkan Role -->
+            <x-card title="Pengguna per Peran" subtitle="Distribusi hak akses sistem SIDORA">
+                <x-slot:headerActions>
+                    <a href="{{ route('admin.users.index') }}" 
+                       class="text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors">
+                        Kelola <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </x-slot:headerActions>
 
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Pegawai</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $users->where('role', 'pegawai')->count() }}</p>
-                </div>
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-user-tie text-green-600"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-600 text-sm font-medium">Pimpinan</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $users->where('role', 'pimpinan')->count() }}</p>
-                </div>
-                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-user-crown text-orange-600"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Users Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <!-- Table Header -->
-        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Daftar Pengguna</h3>
-                    <p class="text-sm text-gray-600 mt-1">Kelola semua pengguna yang terdaftar dalam sistem</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table Content -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Pengguna
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Email & Role
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Bagian
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Status
-                        </th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            Aksi
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($users as $user)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <!-- User Info -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                @if ($user->profile_photo)
-                                    <img src="{{ asset('storage/profile_photos/' . $user->profile_photo) }}" 
-                                         alt="{{ $user->name }}" 
-                                         class="w-10 h-10 rounded-full object-cover border border-gray-200">
-                                @else
-                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                @endif
-                                <div class="ml-4">
-                                    <div class="text-sm font-semibold text-gray-900">{{ $user->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $user->nip ?? 'NIP belum diisi' }}</div>
-                                </div>
-                            </div>
-                        </td>
-
-                        <!-- Email & Role -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $user->email }}</div>
-                            <div class="text-sm">
-                                @if($user->role === 'admin')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                        <i class="fas fa-shield-alt mr-1"></i>
-                                        Administrator
-                                    </span>
-                                @elseif($user->role === 'pimpinan')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                        <i class="fas fa-crown mr-1"></i>
-                                        Pimpinan
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <i class="fas fa-user-tie mr-1"></i>
-                                        Pegawai
-                                    </span>
-                                @endif
-                            </div>
-                        </td>
-
-                        <!-- Bagian -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">
-                                {{ $user->bagian ?? '-' }}
-                            </div>
-                            @if($user->position)
-                                <div class="text-sm text-gray-500">{{ $user->position }}</div>
-                            @endif
-                        </td>
-
-                        <!-- Status -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></div>
-                                Aktif
+                <div class="space-y-4">
+                    <!-- Admin -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="font-medium text-gray-700 flex items-center gap-1.5">
+                                <i class="fas fa-user-shield text-blue-600 w-4"></i> Administrator
                             </span>
-                        </td>
+                            <span class="font-bold text-gray-900">{{ $countAdmin }}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-blue-600 h-1.5 rounded-full" 
+                                 style="width: {{ $totalUsers > 0 ? ($countAdmin / $totalUsers) * 100 : 0 }}%"></div>
+                        </div>
+                    </div>
 
-                        <!-- Actions -->
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <div class="flex justify-center items-center gap-2">
-                                <!-- Edit Button -->
-                                <a href="{{ route('admin.users.edit', $user) }}" 
-                                   class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shadow-sm">
-                                    <i class="fas fa-edit mr-1"></i>
-                                    Edit
-                                </a>
+                    <!-- Pegawai -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="font-medium text-gray-700 flex items-center gap-1.5">
+                                <i class="fas fa-user-tie text-slate-600 w-4"></i> Pegawai
+                            </span>
+                            <span class="font-bold text-gray-900">{{ $countPegawai }}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-slate-600 h-1.5 rounded-full" 
+                                 style="width: {{ $totalUsers > 0 ? ($countPegawai / $totalUsers) * 100 : 0 }}%"></div>
+                        </div>
+                    </div>
 
-                                <!-- Delete Button -->
-                                <form method="POST" 
-                                      action="{{ route('admin.users.destroy', $user) }}" 
-                                      class="inline-block" 
-                                      onsubmit="return confirm('Yakin ingin menghapus pengguna {{ $user->name }}?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" 
-                                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm">
-                                        <i class="fas fa-trash mr-1"></i>
-                                        Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Table Footer (Pagination if needed) -->
-        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-700">
-                    Menampilkan <span class="font-semibold">{{ $users->count() }}</span> pengguna
+                    <!-- Pimpinan -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="font-medium text-gray-700 flex items-center gap-1.5">
+                                <i class="fas fa-crown text-amber-600 w-4"></i> Pimpinan / Kadis
+                            </span>
+                            <span class="font-bold text-gray-900">{{ $countPimpinan }}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-amber-500 h-1.5 rounded-full" 
+                                 style="width: {{ $totalUsers > 0 ? ($countPimpinan / $totalUsers) * 100 : 0 }}%"></div>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Pagination links would go here if using paginate() -->
-                {{-- {{ $users->links() }} --}}
-            </div>
+
+                <div class="pt-4 mt-4 border-t border-gray-100">
+                    <a href="{{ route('admin.users.create') }}" 
+                       class="w-full inline-flex items-center justify-center px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-medium transition-colors shadow-sm">
+                        <i class="fas fa-user-plus mr-1.5"></i> Tambah Pengguna Baru
+                    </a>
+                </div>
+            </x-card>
+
+            <!-- Navigasi Cepat Pengelolaan Surat Admin -->
+            <x-card title="Pengelolaan Surat" subtitle="Menu operasional harian">
+                <div class="space-y-2">
+                    <a href="{{ route('admin.laporan') }}" 
+                       class="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 text-xs font-medium text-gray-700 transition-colors">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fas fa-file-alt text-primary-600"></i>
+                            <span>Laporan Rekapitulasi</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
+                    </a>
+                </div>
+            </x-card>
         </div>
     </div>
 </div>
-
-<style>
-    .shadow-custom {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-</style>
 @endsection
