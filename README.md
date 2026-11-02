@@ -1,66 +1,253 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIDORA
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web pengelolaan surat dinas berbasis Laravel. SIDORA membantu satu instansi mengelola surat keluar dan surat masuk secara digital: mulai dari penyusunan surat oleh pegawai, persetujuan berjenjang oleh pimpinan, penomoran resmi oleh admin, sampai pembuatan PDF lengkap dengan tanda tangan dan QR code.
 
-## About Laravel
+## Daftar Isi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Fitur Utama](#fitur-utama)
+- [Alur Surat](#alur-surat)
+- [Teknologi](#teknologi)
+- [Persyaratan Sistem](#persyaratan-sistem)
+- [Instalasi](#instalasi)
+- [Akun Awal](#akun-awal)
+- [Struktur Proyek](#struktur-proyek)
+- [Model Data](#model-data)
+- [Peta Rute](#peta-rute)
+- [Penomoran Surat](#penomoran-surat)
+- [Pengujian](#pengujian)
+- [Catatan Sebelum Deployment](#catatan-sebelum-deployment)
+- [Lisensi](#lisensi)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Aplikasi memiliki tiga peran (role) dengan hak akses terpisah. Pembatasan akses dilakukan oleh `RoleMiddleware` pada setiap grup rute.
 
-## Learning Laravel
+**Admin**
+- Dashboard ringkasan jumlah pengguna, surat masuk, surat keluar, dan surat yang belum didisposisikan.
+- Manajemen pengguna (tambah, ubah, hapus, hapus massal) beserta jabatan, NIP, dan bagian.
+- Pencatatan surat masuk dari instansi luar (unggah PDF) dan pengiriman surat tersebut ke pegawai tujuan.
+- Laporan surat yang sudah disetujui sepenuhnya, lengkap dengan pembuatan nomor surat resmi.
+- Unduh surat dalam bentuk PDF.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Pegawai**
+- Membuat surat keluar dengan editor teks kaya (Quill), dalam dua jenis: `keluar` (kop standar) dan `keluar_full` (kop instansi lengkap dengan logo, alamat, telepon, email, dan website).
+- Menentukan satu atau beberapa penandatangan secara berurutan, termasuk tanda tangan sendiri sebagai pembuat.
+- Menyimpan draft, mengubah, mengajukan ke pimpinan, memantau status, serta pratinjau dan unduh PDF.
+- Mengunggah surat dalam bentuk PDF.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Pimpinan**
+- Menyetujui atau menolak surat (penolakan wajib disertai alasan) dan memberi catatan disposisi.
+- Persetujuan berantai: surat diteruskan otomatis ke penandatangan pimpinan berikutnya sampai seluruh rantai selesai.
+- Menerima surat masuk, membuat surat balasan, dan melihat status surat balasan.
+- Pembatasan khusus: akun Kepala Dinas tidak dapat membuat surat balasan.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Fitur bersama**
+- Profil pengguna: foto profil (dengan fitur potong gambar), tanda tangan digital, dan data jabatan.
+- Penyaringan HTML pada isi surat memakai HTMLPurifier untuk mencegah XSS.
+- Lencana jumlah surat yang menunggu tindakan pada sidebar tiap peran.
+- Zona waktu `Asia/Jakarta` dan bahasa Indonesia sebagai bawaan.
 
-## Laravel Sponsors
+## Alur Surat
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Surat keluar:
 
-### Premium Partners
+```
+Pegawai membuat draft
+        |
+        v
+Pegawai mengajukan surat           status: draft -> menunggu
+        |
+        v
+Pimpinan 1 menyetujui  ---------> Pimpinan 2 ... Pimpinan N   (sesuai urutan penandatangan)
+        |                                   |
+        | menolak                           | semua setuju
+        v                                   v
+status: ditolak                    status: disetujui
+(disertai alasan penolakan)        (diteruskan ke Admin)
+                                            |
+                                            v
+                                   Admin membuat nomor surat resmi
+                                            |
+                                            v
+                                   Unduh PDF (tanda tangan + QR code)
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Surat masuk:
 
-## Contributing
+```
+Admin mencatat surat masuk (unggah PDF)
+        |
+        v
+Admin mengirim ke pegawai tujuan   status: dikirim
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Status surat yang dipakai aplikasi: `draft_pimpinan`, `draft`, `menunggu`, `disetujui`, `ditolak`, `dikirim`.
 
-## Code of Conduct
+## Teknologi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Lapisan | Teknologi |
+| --- | --- |
+| Bahasa dan framework | PHP 8.1 atau lebih baru, Laravel 10 |
+| Basis data | MySQL |
+| Autentikasi | Session Laravel dengan RBAC kustom (`RoleMiddleware`), Laravel Sanctum |
+| Antarmuka | Blade, Tailwind CSS (CDN), Alpine.js (CDN), Font Awesome |
+| Editor teks | Quill 2 |
+| Pemotong gambar | Cropper.js |
+| Pembuat PDF | barryvdh/laravel-dompdf |
+| QR code | simplesoftwareio/simple-qrcode |
+| Sanitasi HTML | mews/purifier (HTMLPurifier) |
+| Build aset | Vite 4 dengan laravel-vite-plugin |
+| Pengujian | PHPUnit 10 |
 
-## Security Vulnerabilities
+## Persyaratan Sistem
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- PHP 8.1 atau lebih baru dengan ekstensi umum Laravel (`mbstring`, `openssl`, `pdo_mysql`, `fileinfo`, `gd`, `xml`, `ctype`, `json`)
+- Composer 2
+- Node.js 16 atau lebih baru beserta npm
+- MySQL atau MariaDB
+- Koneksi internet saat dijalankan, karena Tailwind, Alpine, Quill, Cropper.js, dan Font Awesome dimuat dari CDN
 
-## License
+## Instalasi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# 1. Unduh proyek
+git clone <url-repositori> sidora
+cd sidora
+
+# 2. Pasang dependensi
+composer install
+npm install
+
+# 3. Siapkan konfigurasi
+cp .env.example .env
+php artisan key:generate
+```
+
+Buat database kosong bernama `sidora`, lalu sesuaikan bagian berikut pada berkas `.env`:
+
+```env
+APP_NAME=SIDORA
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sidora
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Lanjutkan dengan migrasi, seeder, dan menjalankan aplikasi:
+
+```bash
+php artisan migrate --seed
+php artisan storage:link
+npm run build
+
+php artisan serve
+```
+
+Aplikasi dapat dibuka di `http://localhost:8000`. Selama pengembangan antarmuka, jalankan `npm run dev` pada terminal terpisah.
+
+Pada lingkungan Windows (misalnya Laragon), symlink `storage:link` kadang bermasalah. Untuk itu aplikasi sudah menyediakan rute `/storage/{path}` yang melayani berkas dari `storage/app/public` secara langsung.
+
+## Akun Awal
+
+`UserSeeder` membuat tiga akun contoh:
+
+| Peran | Email | Kata sandi |
+| --- | --- | --- |
+| Admin | `admin@example.com` | `admin123` |
+| Pegawai | `pegawai@example.com` | `pegawai123` |
+| Pimpinan | `pimpinan@example.com` | `pimpinan123` |
+
+Akun ini hanya untuk pengembangan. Ganti kata sandinya atau hapus akun tersebut sebelum aplikasi dipakai secara nyata.
+
+Setelah login sebagai admin, buka menu Pengguna dan lengkapi **jabatan (position)** serta **bagian** untuk setiap akun pimpinan. Aplikasi mencocokkan penandatangan dengan akun pimpinan berdasarkan kedua kolom tersebut, dan akun dikenali sebagai Kepala Dinas jika jabatan atau bagiannya memuat kata "kepala dinas" atau "kadis".
+
+## Struktur Proyek
+
+```
+app/
+  Http/
+    Controllers/
+      Admin/         UserController, SuratController (surat masuk, laporan, penomoran, PDF)
+      Pegawai/       SuratController, PegawaiDashboardController
+      Pimpinan/      SuratController (persetujuan, disposisi, surat balasan)
+      AuthController, ProfileController
+    Middleware/      RoleMiddleware (RBAC)
+  Models/            User, Surat, SuratPenandatangan, Disposisi
+  Providers/         AppServiceProvider (locale, zona waktu, data lencana sidebar)
+database/
+  migrations/        users, surats, disposis, surat_penandatangan, dan penambahan kolom
+  seeders/           UserSeeder, DatabaseSeeder
+resources/
+  views/
+    admin/ pegawai/ pimpinan/ auth/ profile/
+    layouts/         app.blade.php dan partials (header, sidebar per peran, footer)
+    components/      card, page-header, stat-card, status-badge
+routes/              web.php, api.php
+storage/app/public/  logos, profile_photos, signatures, surat_files, surat_masuk
+tests/Feature/       loginTest.php
+```
+
+## Model Data
+
+| Tabel | Fungsi | Kolom penting |
+| --- | --- | --- |
+| `users` | Akun pengguna | `name`, `email`, `role` (admin, pegawai, pimpinan), `position`, `nip`, `bagian`, `signature`, `profile_photo` |
+| `surats` | Surat masuk dan keluar | `user_id`, `pengirim_id`, `judul`, `nomor_surat`, `jenis` (masuk, keluar, keluar_full), `status`, `isi`, `tujuan`, data kop instansi, `disposisi_user_id`, `perlu_disposisi_admin`, `alasan_penolakan`, `file_path` |
+| `surat_penandatangan` | Rantai penandatangan tiap surat | `surat_id`, `user_id`, `peran` (pembuat, pimpinan), `urutan`, `jabatan`, `nama`, `nip`, `status` (menunggu, ditandatangani, ditolak), `tanda_tangan`, `signed_at` |
+| `disposisis` | Catatan disposisi | `surat_id`, `pimpinan_id`, `catatan` |
+
+Relasi utama: satu `User` memiliki banyak `Surat`; satu `Surat` memiliki banyak `SuratPenandatangan` yang diurutkan menurut kolom `urutan`.
+
+## Peta Rute
+
+| Prefix | Peran | Fungsi utama |
+| --- | --- | --- |
+| `/login`, `/logout`, `/reset-password` | Publik | Autentikasi dan penggantian kata sandi |
+| `/admin/*` | admin | Dashboard, pengguna, laporan surat, surat masuk, penomoran, unduh PDF |
+| `/pegawai/*` | pegawai | Dashboard, buat, ubah, ajukan, status, pratinjau, unduh, unggah PDF |
+| `/pimpinan/*` | pimpinan | Dashboard, setujui, tolak, disposisi, surat balasan, surat masuk |
+| `/profile` | semua peran | Ubah profil, foto, dan tanda tangan |
+| `/storage/{path}` | Publik | Melayani berkas `storage/app/public` |
+
+Setelah login, pengguna diarahkan ke `/{role}/dashboard`. Daftar lengkap dapat dilihat dengan `php artisan route:list`.
+
+## Penomoran Surat
+
+Nomor resmi dibuat oleh admin pada halaman laporan setelah surat berstatus `disetujui`. Formatnya:
+
+```
+{kode_klasifikasi}/{nomor_urut}/{kode_unit}/{bulan}/{tahun}
+```
+
+Contoh: `500.15.6.1/0001/DISNAKER/10/2026`
+
+- `nomor_urut` disarankan otomatis oleh sistem berdasarkan nomor tertinggi pada tahun berjalan, lalu diisi ulang menjadi minimal empat digit.
+- `bulan` diisi dua digit.
+- Daftar kode klasifikasi arsip (misalnya `500.15.x` untuk ketenagakerjaan, `800` untuk kepegawaian, `000` untuk umum) didefinisikan pada `Admin\SuratController::getKlasifikasiArsip()` dan dapat disesuaikan dengan kebutuhan instansi.
+
+## Pengujian
+
+```bash
+php artisan test
+```
+
+Saat ini tersedia pengujian fitur untuk alur login (kredensial benar dan salah) pada `tests/Feature/loginTest.php`.
+
+## Catatan Sebelum Deployment
+
+Lakukan langkah berikut saat memindahkan aplikasi ke server produksi:
+
+1. Atur `APP_ENV=production` dan `APP_DEBUG=false` pada `.env`.
+2. Ganti seluruh kata sandi akun contoh dan pastikan `.env` tidak ikut terunggah ke repositori.
+3. Arahkan document root web server ke folder `public`.
+4. Pastikan folder `storage` dan `bootstrap/cache` dapat ditulis oleh web server.
+5. Jalankan `php artisan config:cache`, `php artisan route:cache`, dan `php artisan view:cache`.
+6. Gunakan HTTPS dan batasi akses ke folder `storage/app/public/surat_files` serta `surat_masuk` karena berisi dokumen resmi.
+
+## Lisensi
+
+Proyek ini dirilis dengan lisensi [MIT](https://opensource.org/licenses/MIT), mengikuti lisensi kerangka kerja Laravel.
