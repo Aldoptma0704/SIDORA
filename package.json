@@ -8,5 +8,12 @@
         "axios": "^1.1.2",
         "laravel-vite-plugin": "^0.7.2",
         "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "@ckeditor/ckeditor5-font": "^46.0.0",
+        "quill": "^2.0.3",
+        "quill-better-table": "^1.2.10",
+        "quill-delta-to-html": "^0.12.1",
+        "run": "^1.5.0"
     }
 }

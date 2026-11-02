@@ -17,10 +17,21 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    public function surats()
+    {
+        return $this->hasMany(Surat::class);
+    }
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'bagian',
+        'position', 
+        'nip',      
+        'profile_photo',
+        'signature',
     ];
 
     /**
@@ -41,4 +52,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Cek apakah user adalah Kepala Dinas
+     */
+    public function isKepalaDinas(): bool
+    {
+        if ($this->role !== 'pimpinan') {
+            return false;
+        }
+        $bagian = strtolower($this->bagian ?? '');
+        $pos    = strtolower($this->position ?? '');
+        return str_contains($bagian, 'kepala dinas') ||
+               str_contains($bagian, 'kadis') ||
+               str_contains($pos, 'kepala dinas') ||
+               str_contains($pos, 'kadis');
+    }
 }
